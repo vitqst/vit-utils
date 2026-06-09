@@ -146,6 +146,47 @@ test("ReviewScreen virtualizes a 5,000-photo grid", () => {
   expect(container.querySelectorAll(".gcard").length).toBeLessThan(50);
 });
 
+test("ReviewScreen lightbox contains the full image inside the popup", () => {
+  const file = makeFile(1);
+  const photo = {
+    ...makeDemoPhoto(1),
+    real: true,
+    file,
+  };
+
+  const { container } = render(
+    <ReviewScreen photos={[photo]} decisions={{ [photo.id]: "keep" }}
+      {...reviewProps} lightbox={photo.id} />,
+  );
+
+  const lightboxImage = container.querySelector(".lb-card img");
+  expect(lightboxImage).toHaveStyle({ objectFit: "contain" });
+  expect(lightboxImage.parentElement).toHaveClass("lb-fill");
+});
+
+test.each(["keep", "reject"])("ReviewScreen lightbox advances after %s", (verdict) => {
+  const photos = [makeDemoPhoto(1), makeDemoPhoto(2)];
+  const onReclassify = jest.fn();
+  const onLightbox = jest.fn();
+  const { container } = render(
+    <ReviewScreen photos={photos} decisions={{ p1: "keep", p2: "keep" }}
+      {...reviewProps} lightbox={photos[0].id}
+      onReclassify={onReclassify} onLightbox={onLightbox} />,
+  );
+
+  fireEvent.click(container.querySelector(`.lb-actions .act.${verdict}`));
+
+  expect(onReclassify).toHaveBeenCalledWith(photos[0].id, verdict);
+  expect(onLightbox).toHaveBeenCalledWith(photos[1].id);
+});
+
+test("ReviewScreen card actions are not revealed by selection", () => {
+  const styles = document.getElementById("app-styles").textContent;
+
+  expect(styles).toContain(".gcard:hover .qa {");
+  expect(styles).not.toContain(".gcard.sel .qa");
+});
+
 test("CullScreen renders only a small window of a large burst filmstrip", () => {
   const photos = Array.from({ length: 100 }, (_, index) => ({
     ...makeDemoPhoto(index),
@@ -219,4 +260,59 @@ test("ReviewScreen limits large-file thumbnail decoding to two concurrent jobs",
     pending.forEach((resolve) => resolve({ width: 480, height: 320, close: jest.fn() }));
     await Promise.resolve();
   });
+});
+
+test("Fill reuses a decoded thumbnail after it scrolls out and back into view", async () => {
+  const file = makeFile(101);
+  const photo = { real: true, file, name: file.name };
+  const bitmap = { width: 480, height: 320, close: jest.fn() };
+  const drawImage = jest.fn();
+  window.createImageBitmap = jest.fn().mockResolvedValue(bitmap);
+  jest.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({ drawImage });
+
+  const firstRender = render(
+    <Fill p={photo} previewWidth={480} previewHeight={320} />,
+  );
+  await waitFor(() => expect(drawImage).toHaveBeenCalledTimes(1));
+  firstRender.unmount();
+
+  render(<Fill p={photo} previewWidth={480} previewHeight={320} />);
+
+  await waitFor(() => expect(drawImage).toHaveBeenCalledTimes(2));
+  expect(window.createImageBitmap).toHaveBeenCalledTimes(1);
+  expect(bitmap.close).not.toHaveBeenCalled();
+});
+
+test("Fill bounds the decoded thumbnail cache while retaining recent images", async () => {
+  const photos = Array.from({ length: 200 }, (_, index) => {
+    const file = makeFile(index + 200);
+    return { real: true, file, name: file.name };
+  });
+  const bitmaps = [];
+  const drawImage = jest.fn();
+  window.createImageBitmap = jest.fn(() => {
+    const bitmap = { width: 480, height: 320, close: jest.fn() };
+    bitmaps.push(bitmap);
+    return Promise.resolve(bitmap);
+  });
+  jest.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({ drawImage });
+
+  const gallery = render(
+    <>{photos.map((photo) => (
+      <Fill key={photo.name} p={photo} previewWidth={480} previewHeight={320} />
+    ))}</>,
+  );
+  await waitFor(() => expect(drawImage).toHaveBeenCalledTimes(200));
+  gallery.unmount();
+
+  const recentPhoto = render(
+    <Fill p={photos.at(-1)} previewWidth={480} previewHeight={320} />,
+  );
+  await waitFor(() => expect(drawImage).toHaveBeenCalledTimes(201));
+  expect(window.createImageBitmap).toHaveBeenCalledTimes(200);
+  recentPhoto.unmount();
+
+  render(<Fill p={photos[0]} previewWidth={480} previewHeight={320} />);
+  await waitFor(() => expect(window.createImageBitmap).toHaveBeenCalledTimes(201));
+  expect(bitmaps.some((bitmap) => bitmap.close.mock.calls.length > 0)).toBe(true);
 });

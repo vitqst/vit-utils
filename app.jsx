@@ -192,7 +192,7 @@ const CSS = `
 /* quick keep/reject actions on each grouped frame */
 .gcard .qa { position:absolute; left:0; right:0; bottom:0; display:flex; gap:6px; padding:8px;
   opacity:0; transform:translateY(6px); transition:.14s; background:linear-gradient(0deg, rgba(8,9,12,.55), transparent); }
-.gcard:hover .qa, .gcard.sel .qa { opacity:1; transform:none; }
+.gcard:hover .qa { opacity:1; transform:none; }
 .qbtn { flex:1; font-family:var(--mono); font-weight:600; font-size:11px; letter-spacing:.04em; padding:7px 0;
   border-radius:7px; border:1px solid rgba(255,255,255,.26); background:rgba(12,14,18,.5); color:#fff;
   cursor:pointer; backdrop-filter:blur(4px); transition:.12s; }
@@ -213,6 +213,8 @@ const CSS = `
 .lb-card { background:var(--panel); border-radius:14px; padding:10px; box-shadow:var(--shadow-card);
   width:min(80vw, calc(70vh * 1.5)); }
 .lb-card .photo { position:relative; width:100%; aspect-ratio:3/2; border-radius:6px; overflow:hidden; background:#0d0f12; }
+.lb-card .lb-fill { position:absolute; inset:0; background-size:contain; background-position:center; background-repeat:no-repeat; }
+.lb-card .lb-fill img, .lb-card .lb-fill canvas { width:100%; height:100%; object-fit:contain; display:block; }
 .lb-badge { position:absolute; top:14px; right:14px; font-family:var(--ui); font-weight:800; font-size:15px; letter-spacing:.12em;
   padding:6px 12px; border-radius:8px; border:3px solid; background:rgba(12,14,18,.32); backdrop-filter:blur(4px); }
 .lb-badge.keep { color:var(--keep); border-color:var(--keep); }
@@ -250,8 +252,12 @@ function fillStyle(p, blurScale = 1) {
 function sharpColor(s) { return s > 0.75 ? "var(--keep)" : s > 0.5 ? "var(--maybe)" : "var(--reject)"; }
 
 const PREVIEW_DECODE_LIMIT = 2;
+const PREVIEW_CACHE_MAX_BYTES = 64 * 1024 * 1024;
 let activePreviewDecodes = 0;
 const previewDecodeQueue = [];
+const previewBitmapCache = new WeakMap();
+const previewBitmapLru = new Map();
+let previewBitmapCacheBytes = 0;
 
 function pumpPreviewDecodes() {
   while (activePreviewDecodes < PREVIEW_DECODE_LIMIT && previewDecodeQueue.length) {
@@ -309,6 +315,100 @@ function schedulePreviewDecode(file, resizeWidth) {
   };
 }
 
+function touchPreviewBitmap(entry) {
+  previewBitmapLru.delete(entry);
+  previewBitmapLru.set(entry, true);
+}
+
+function removePreviewBitmap(entry) {
+  if (entry.fileEntries.get(entry.key) === entry) entry.fileEntries.delete(entry.key);
+  previewBitmapLru.delete(entry);
+  if (!entry.bitmap) return;
+  previewBitmapCacheBytes = Math.max(0, previewBitmapCacheBytes - entry.bytes);
+  entry.bitmap.close?.();
+  entry.bitmap = null;
+  entry.bytes = 0;
+}
+
+function evictPreviewBitmaps() {
+  while (previewBitmapCacheBytes > PREVIEW_CACHE_MAX_BYTES) {
+    let entry = null;
+    for (const candidate of previewBitmapLru.keys()) {
+      if (candidate.users === 0) {
+        entry = candidate;
+        break;
+      }
+    }
+    if (!entry) return;
+    removePreviewBitmap(entry);
+  }
+}
+
+function acquirePreviewBitmap(file, width, height) {
+  let fileEntries = previewBitmapCache.get(file);
+  if (!fileEntries) {
+    fileEntries = new Map();
+    previewBitmapCache.set(file, fileEntries);
+  }
+
+  const key = `${width}x${height}`;
+  let entry = fileEntries.get(key);
+  if (!entry) {
+    const job = schedulePreviewDecode(file, Math.max(width, height));
+    entry = {
+      key,
+      fileEntries,
+      job,
+      users: 0,
+      bitmap: null,
+      bytes: 0,
+      state: "pending",
+      cancelled: false,
+      promise: null,
+    };
+    entry.promise = job.promise.then((bitmap) => {
+      if (!bitmap || entry.cancelled) {
+        bitmap?.close?.();
+        return null;
+      }
+      entry.state = "ready";
+      entry.bitmap = bitmap;
+      entry.bytes = bitmap.width * bitmap.height * 4;
+      previewBitmapCacheBytes += entry.bytes;
+      touchPreviewBitmap(entry);
+      evictPreviewBitmaps();
+      return bitmap;
+    }, (error) => {
+      if (fileEntries.get(key) === entry) fileEntries.delete(key);
+      throw error;
+    });
+    fileEntries.set(key, entry);
+  } else if (entry.state === "ready") {
+    touchPreviewBitmap(entry);
+  }
+
+  entry.users++;
+  let released = false;
+  return {
+    promise: entry.promise,
+    release: () => {
+      if (released) return;
+      released = true;
+      entry.users = Math.max(0, entry.users - 1);
+      if (entry.state === "pending" && entry.users === 0) {
+        entry.cancelled = true;
+        if (fileEntries.get(key) === entry) fileEntries.delete(key);
+        entry.job.cancel();
+        return;
+      }
+      if (entry.state === "ready") {
+        touchPreviewBitmap(entry);
+        evictPreviewBitmaps();
+      }
+    },
+  };
+}
+
 function drawBitmapCover(canvas, bitmap, width, height) {
   const context = canvas.getContext("2d", { alpha: false });
   if (!context) return false;
@@ -338,7 +438,7 @@ function PreviewFill({ p, cls, width, height }) {
   useEffect(() => {
     let mounted = true;
     let fallbackObjectUrl = null;
-    let job = null;
+    let preview = null;
     setFallbackUrl(null);
 
     const showFallback = () => {
@@ -350,18 +450,17 @@ function PreviewFill({ p, cls, width, height }) {
     if (typeof window.createImageBitmap !== "function") {
       showFallback();
     } else {
-      job = schedulePreviewDecode(p.file, Math.max(width, height));
-      job.promise.then((bitmap) => {
+      preview = acquirePreviewBitmap(p.file, width, height);
+      preview.promise.then((bitmap) => {
         if (!mounted || !bitmap) return;
         const drawn = canvasRef.current && drawBitmapCover(canvasRef.current, bitmap, width, height);
-        bitmap.close?.();
         if (!drawn) showFallback();
       }).catch(showFallback);
     }
 
     return () => {
       mounted = false;
-      job?.cancel();
+      preview?.release();
       if (fallbackObjectUrl) URL.revokeObjectURL(fallbackObjectUrl);
     };
   }, [p.file, width, height]);
@@ -375,7 +474,7 @@ function PreviewFill({ p, cls, width, height }) {
   );
 }
 
-function ObjectUrlFill({ p, cls }) {
+function ObjectUrlFill({ p, cls, fit }) {
   const [url, setUrl] = useState(null);
 
   useEffect(() => {
@@ -384,13 +483,14 @@ function ObjectUrlFill({ p, cls }) {
     return () => URL.revokeObjectURL(objectUrl);
   }, [p.file]);
 
-  return <div className={cls}>{url && <img src={url} alt={p.name} draggable="false" loading="lazy" decoding="async" />}</div>;
+  return <div className={cls}>{url && <img src={url} alt={p.name} draggable="false" loading="lazy"
+    decoding="async" style={fit ? { objectFit: fit } : undefined} />}</div>;
 }
 
 /* a single photo surface (demo gradient or real <img>) */
-export function Fill({ p, cls = "fill", blurScale = 1, previewWidth = 0, previewHeight = 0 }) {
+export function Fill({ p, cls = "fill", blurScale = 1, previewWidth = 0, previewHeight = 0, fit }) {
   if (p.real && previewWidth && previewHeight) return <PreviewFill p={p} cls={cls} width={previewWidth} height={previewHeight} />;
-  if (p.real) return <ObjectUrlFill p={p} cls={cls} />;
+  if (p.real) return <ObjectUrlFill p={p} cls={cls} fit={fit} />;
   return <div className={cls} style={fillStyle(p, blurScale)} />;
 }
 
@@ -594,13 +694,17 @@ export function CullScreen({ queue, allPhotos, cursor, decisions, leaving, t, pa
 /* ---------------------------------------------------------------- lightbox (big keep/reject view) */
 function BigView({ photo, idx, total, verdict, t, onClose, onPrev, onNext, onReclassify }) {
   const showMeta = t.meta !== false && !photo.real;
+  const classify = (nextVerdict) => {
+    onReclassify(photo.id, nextVerdict);
+    if (idx < total - 1) onNext();
+  };
   return (
     <div className="sheet lb" onClick={onClose}>
       <div className="lb-stage" onClick={(e) => e.stopPropagation()}>
         <button className="lb-nav prev" onClick={onPrev} disabled={idx <= 0} aria-label="Previous">‹</button>
         <div className="lb-card grain">
           <div className="photo">
-            <Fill p={photo} />
+            <Fill p={photo} cls="lb-fill" fit="contain" />
             <div className="scrim t" />
             <div className="chip tl"><span className="pill">{photo.name}</span></div>
             {photo.isBurst && <div className="chip tr"><span className="pill burst">⚡ {photo.burstName} · {photo.frame + 1}/{photo.frames}</span></div>}
@@ -617,8 +721,8 @@ function BigView({ photo, idx, total, verdict, t, onClose, onPrev, onNext, onRec
             )}
           </div>
           <div className="lb-actions">
-            <button className="act reject" onClick={() => onReclassify(photo.id, "reject")}><span className="ico">✕</span> Reject <small>R</small></button>
-            <button className="act keep" onClick={() => onReclassify(photo.id, "keep")}><span className="ico">✓</span> Keep <small>K</small></button>
+            <button className="act reject" onClick={() => classify("reject")}><span className="ico">✕</span> Reject <small>R</small></button>
+            <button className="act keep" onClick={() => classify("keep")}><span className="ico">✓</span> Keep <small>K</small></button>
           </div>
         </div>
         <button className="lb-nav next" onClick={onNext} disabled={idx >= total - 1} aria-label="Next">›</button>
