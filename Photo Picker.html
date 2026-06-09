@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cull — fast photo culling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: oklch(0.966 0.003 240);
+    --bg-2: oklch(0.94 0.004 240);
+    --panel: #ffffff;
+    --ink: oklch(0.24 0.012 255);
+    --muted: oklch(0.56 0.012 255);
+    --faint: oklch(0.72 0.008 255);
+    --line: oklch(0.9 0.004 255);
+    --line-2: oklch(0.84 0.005 255);
+    --keep: oklch(0.6 0.13 150);
+    --keep-soft: oklch(0.6 0.13 150 / 0.12);
+    --reject: oklch(0.6 0.17 25);
+    --reject-soft: oklch(0.6 0.17 25 / 0.12);
+    --maybe: oklch(0.68 0.11 80);
+    --ui: "Helvetica Neue", Helvetica, "Segoe UI", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --shadow-card: 0 1px 2px rgba(20,22,28,.06), 0 18px 40px -18px rgba(20,22,28,.32), 0 40px 80px -40px rgba(20,22,28,.28);
+    --r: 10px;
+  }
+  [data-bg="warm"] { --bg: oklch(0.967 0.006 70); --bg-2: oklch(0.94 0.008 70); }
+  [data-bg="paper"] { --bg: oklch(0.95 0.009 95); --bg-2: oklch(0.92 0.011 95); }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: var(--ui);
+    color: var(--ink);
+    background:
+      radial-gradient(140% 120% at 50% -20%, var(--bg) 40%, var(--bg-2)),
+      var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow: hidden;
+  }
+  #root { height: 100%; }
+  button { font-family: inherit; }
+  ::selection { background: oklch(0.6 0.13 150 / .22); }
+
+  /* shared film-grain overlay */
+  .grain::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    opacity: .06; mix-blend-mode: overlay; border-radius: inherit;
+  }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script src="photos.js"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="app.jsx"></script>
+</body>
+</html>
