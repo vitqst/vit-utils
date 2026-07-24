@@ -291,4 +291,18 @@ describe("tool platform shell", () => {
       view.unmount();
     }
   });
+
+  it("discloses the HIBP network exception in the route chrome", async () => {
+    window.history.replaceState({}, "", "/tools/hibp");
+    render(<App />);
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Breach check (HIBP)",
+        level: 1,
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("HIBP prefix request")).toBeInTheDocument();
+    expect(screen.getByText(/External requests:/)).toHaveTextContent("1");
+  });
 });

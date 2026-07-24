@@ -304,9 +304,9 @@ function Sidebar({
           );
         })}
         <div className="m-2 mt-4 min-h-[73px] rounded-lg border border-[var(--vt-border)] bg-[var(--vt-bg-1)] px-3 py-2.5">
-          <p className="flex items-center gap-[7px] font-mono text-[11px] font-semibold text-[var(--vt-green)]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--vt-green)]" />
-            {t.externalRequests}: <b>0</b>
+          <p className={`flex items-center gap-[7px] font-mono text-[11px] font-semibold ${activeTool?.privacy === "network-prefix" ? "text-[var(--vt-yellow)]" : "text-[var(--vt-green)]"}`}>
+            <span className={`h-1.5 w-1.5 rounded-full ${activeTool?.privacy === "network-prefix" ? "bg-[var(--vt-yellow)]" : "bg-[var(--vt-green)]"}`} />
+            {t.externalRequests}: <b>{activeTool?.privacy === "network-prefix" ? 1 : 0}</b>
           </p>
           <p className="mt-[5px] max-w-[180px] text-[11px] leading-[1.5] text-[var(--vt-text-3)]">
             {t.verifyNetwork}
@@ -319,16 +319,16 @@ function Sidebar({
 
 const proofCopy = {
   en: [
-    ["No uploads", "Files and text are processed in your browser and sent nowhere."],
+    ["No uploads", "Files, text, and secrets stay local; reviewed derived-data exceptions are disclosed."],
     ["No tracking", "No analytics cookies, fingerprinting, or server-side logs."],
     ["No ads", "A focused interface with no banners or interrupting popups."],
-    ["Verifiable", "Every tool page makes zero external requests. Open DevTools and see."],
+    ["Verifiable", "Each route shows zero requests or its reviewed exception. Open DevTools and see."],
   ],
   vi: [
-    ["Không upload", "Tệp và văn bản được xử lý ngay trong trình duyệt, không gửi đi đâu cả."],
+    ["Không upload", "Tệp, văn bản và bí mật ở cục bộ; ngoại lệ dữ liệu dẫn xuất được công khai."],
     ["Không theo dõi", "Không cookie phân tích, không fingerprint, không log phía server."],
     ["Không quảng cáo", "Giao diện gọn, tập trung vào việc — không banner, không popup."],
-    ["Kiểm chứng được", "Mỗi trang công cụ: 0 request ra ngoài. Mở DevTools là thấy ngay."],
+    ["Kiểm chứng được", "Mỗi trang hiển thị 0 request hoặc ngoại lệ đã duyệt. Mở DevTools để xem."],
   ],
 } as const;
 
@@ -593,7 +593,11 @@ function GroupPage({
                       : "border-[var(--vt-border)] text-[var(--vt-text-3)]"
                   }`}
                 >
-                  {readyTool ? t.offlineReady : t.planned}
+                  {readyTool
+                    ? readyTool.privacy === "network-prefix"
+                      ? t.networkRequired
+                      : t.offlineReady
+                    : t.planned}
                 </span>
               </>
             );
@@ -651,9 +655,9 @@ function ToolPage({
         <span className="text-[11px] font-semibold text-[var(--vt-text)]">
           {tool.name[locale]}
         </span>
-        <span className="ml-auto flex items-center gap-1.5 rounded-full border border-[var(--vt-border)] bg-[var(--vt-bg-1)] px-2.5 py-1 font-mono text-[9px] font-semibold text-[var(--vt-green)]">
+        <span className={`ml-auto flex items-center gap-1.5 rounded-full border border-[var(--vt-border)] bg-[var(--vt-bg-1)] px-2.5 py-1 font-mono text-[9px] font-semibold ${tool.privacy === "network-prefix" ? "text-[var(--vt-yellow)]" : "text-[var(--vt-green)]"}`}>
           <ShieldIcon className="h-3 w-3" />
-          {t.localOnly}
+          {tool.privacy === "network-prefix" ? t.networkPrefix : t.localOnly}
         </span>
       </div>
       <div className="min-h-0 flex-1">

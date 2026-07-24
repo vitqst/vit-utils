@@ -187,7 +187,7 @@ describe("tool registry", () => {
   });
 
   it("exposes implemented Security tools as lazy routes", () => {
-    const readySecurityIds = ["hash", "strength"];
+    const readySecurityIds = ["hash", "strength", "hibp"];
     const readySecurityTools = toolRegistry.filter(
       (tool) => tool.group === "security",
     );
@@ -198,6 +198,9 @@ describe("tool registry", () => {
       expect(tool.load).toEqual(expect.any(Function));
       expect(getToolByPath(tool.path)).toBe(tool);
     });
+    expect(readySecurityTools.find((tool) => tool.id === "hibp")?.privacy).toBe(
+      "network-prefix",
+    );
   });
 
   it("keeps registry ids and paths unique", () => {

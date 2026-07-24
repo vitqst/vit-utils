@@ -31,7 +31,7 @@ export interface ToolDefinition {
   keywords: Record<Locale, string[]>;
   icon: "aperture";
   path: `/tools/${string}`;
-  privacy: "local-only";
+  privacy: "local-only" | "network-prefix";
   status: "ready" | "planned";
   load: () => Promise<ToolModule>;
 }

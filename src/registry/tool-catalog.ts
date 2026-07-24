@@ -13,6 +13,7 @@ function tool<const Id extends string>(
   description: LocalizedText,
   keywords: Record<"en" | "vi", string[]>,
   status: ToolCatalogEntry["status"] = "planned",
+  privacy: ToolCatalogEntry["privacy"] = "local-only",
 ): ToolCatalogEntry {
   return {
     id,
@@ -22,7 +23,7 @@ function tool<const Id extends string>(
     keywords,
     icon: "aperture",
     path: `/tools/${id}`,
-    privacy: "local-only",
+    privacy,
     status,
   };
 }
@@ -457,6 +458,8 @@ export const toolCatalog = [
       "Kiểm tra mật khẩu trong dữ liệu rò rỉ bằng yêu cầu tiền tố k-anonymity được công khai.",
     ),
     { en: ["HIBP", "breach", "password", "k-anonymity"], vi: ["HIBP", "rò rỉ", "mật khẩu", "k-anonymity"] },
+    "ready",
+    "network-prefix",
   ),
   tool(
     "certificate",

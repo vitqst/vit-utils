@@ -153,6 +153,10 @@ export const toolRegistry = [
     load: () => import("../tools/strength"),
   },
   {
+    ...catalogEntry("hibp"),
+    load: () => import("../tools/hibp"),
+  },
+  {
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },
