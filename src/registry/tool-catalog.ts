@@ -325,6 +325,7 @@ export const toolCatalog = [
       "Tạo mã QR tải xuống từ văn bản, liên kết, Wi-Fi hoặc thông tin liên hệ.",
     ),
     { en: ["QR", "code", "Wi-Fi", "download"], vi: ["QR", "mã", "Wi-Fi", "tải xuống"] },
+    "ready",
   ),
   tool(
     "barcode",
@@ -335,6 +336,7 @@ export const toolCatalog = [
       "Tạo và kiểm tra các định dạng mã vạch một chiều phổ biến.",
     ),
     { en: ["barcode", "Code 128", "EAN", "UPC"], vi: ["mã vạch", "Code 128", "EAN", "UPC"] },
+    "ready",
   ),
   tool(
     "mock",

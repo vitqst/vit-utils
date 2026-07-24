@@ -151,7 +151,7 @@ describe("tool registry", () => {
   });
 
   it("exposes implemented Generator tools as lazy routes", () => {
-    const readyGeneratorIds = ["ids", "password"];
+    const readyGeneratorIds = ["ids", "password", "qr", "barcode"];
     const readyGeneratorTools = toolRegistry.filter(
       (tool) => tool.group === "generators",
     );

@@ -105,6 +105,14 @@ export const toolRegistry = [
     load: () => import("../tools/password"),
   },
   {
+    ...catalogEntry("qr"),
+    load: () => import("../tools/qr"),
+  },
+  {
+    ...catalogEntry("barcode"),
+    load: () => import("../tools/barcode"),
+  },
+  {
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },
