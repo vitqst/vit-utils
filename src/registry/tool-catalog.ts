@@ -435,6 +435,7 @@ export const toolCatalog = [
       "Băm văn bản bằng thuật toán phổ biến và nhận diện định dạng hash có thể có.",
     ),
     { en: ["hash", "SHA", "MD5", "digest"], vi: ["băm", "SHA", "MD5", "digest"] },
+    "ready",
   ),
   tool(
     "strength",
@@ -445,6 +446,7 @@ export const toolCatalog = [
       "Ước tính độ mạnh mật khẩu cục bộ và giải thích điểm yếu cần cải thiện.",
     ),
     { en: ["password", "strength", "entropy", "security"], vi: ["mật khẩu", "độ mạnh", "entropy", "bảo mật"] },
+    "ready",
   ),
   tool(
     "hibp",

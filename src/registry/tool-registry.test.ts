@@ -186,6 +186,20 @@ describe("tool registry", () => {
     });
   });
 
+  it("exposes implemented Security tools as lazy routes", () => {
+    const readySecurityIds = ["hash", "strength"];
+    const readySecurityTools = toolRegistry.filter(
+      (tool) => tool.group === "security",
+    );
+
+    expect(readySecurityTools.map((tool) => tool.id)).toEqual(readySecurityIds);
+    readySecurityTools.forEach((tool) => {
+      expect(tool).toMatchObject({ status: "ready", group: "security" });
+      expect(tool.load).toEqual(expect.any(Function));
+      expect(getToolByPath(tool.path)).toBe(tool);
+    });
+  });
+
   it("keeps registry ids and paths unique", () => {
     expect(new Set(toolCatalog.map((tool) => tool.id))).toHaveProperty(
       "size",

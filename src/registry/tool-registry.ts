@@ -145,6 +145,14 @@ export const toolRegistry = [
     load: () => import("../tools/checksum"),
   },
   {
+    ...catalogEntry("hash"),
+    load: () => import("../tools/hash"),
+  },
+  {
+    ...catalogEntry("strength"),
+    load: () => import("../tools/strength"),
+  },
+  {
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },
