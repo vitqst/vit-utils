@@ -292,6 +292,39 @@ describe("tool platform shell", () => {
     }
   });
 
+  it("shows all five Security tools with the HIBP exception disclosed", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("link", { name: /security/i }));
+
+    expect(window.location.pathname).toBe("/groups/security");
+    expect(
+      screen.getByRole("heading", { name: /security/i }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("Works offline")).toHaveLength(4);
+    expect(screen.getByText("Network disclosed")).toBeInTheDocument();
+  });
+
+  it("opens every Security tool from its stable direct route", async () => {
+    const routes = [
+      ["/tools/hash", "SHA / MD5 hashes"],
+      ["/tools/strength", "Password strength"],
+      ["/tools/hibp", "Breach check (HIBP)"],
+      ["/tools/certificate", "X.509 decoder"],
+      ["/tools/hmac", "HMAC"],
+    ] as const;
+
+    for (const [path, heading] of routes) {
+      window.history.replaceState({}, "", path);
+      const view = render(<App />);
+
+      expect(
+        await screen.findByRole("heading", { name: heading, level: 1 }),
+      ).toBeInTheDocument();
+      view.unmount();
+    }
+  });
+
   it("discloses the HIBP network exception in the route chrome", async () => {
     window.history.replaceState({}, "", "/tools/hibp");
     render(<App />);

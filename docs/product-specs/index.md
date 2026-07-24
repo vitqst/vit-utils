@@ -37,10 +37,14 @@
 - [CSV ↔ XLSX](sheets.md) — bounded spreadsheet conversion and preview.
 - [Zip / Unzip](zip.md) — archive creation and preflighted safe extraction.
 - [File Checksum](checksum.md) — chunked calculation and checksum verification.
+- [SHA / MD5 Hashes](hash.md) — local text digests and format identification.
+- [Password Strength](strength.md) — worker-backed local strength estimation.
+- [Breach Check (HIBP)](hibp.md) — disclosed k-anonymity prefix lookup.
+- [X.509 Decoder](certificate.md) — local PEM and DER field inspection.
+- [HMAC](hmac.md) — local Web Crypto message signatures.
 
 ## Planned groups
 
-- Security
 - Media
 
 Planned tool names remain in `docs/requirements/20260721-init-app.md`. A tool receives its own product specification before implementation.
