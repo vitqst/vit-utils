@@ -11,10 +11,17 @@
 - [Regex Tester](regex.md) — JavaScript matches, flags, captures, and validation.
 - [Lorem Ipsum](lorem.md) — deterministic placeholder generation.
 - [Unicode Inspector](unicode.md) — grapheme, code-point, and UTF-16 inspection.
+- [JSON Formatter](json.md) — validation, formatting, sorting, and minification.
+- [Base64](base64.md) — UTF-8 text and worker-backed local file conversion.
+- [JSON ↔ YAML ↔ CSV](data-convert.md) — safe structured-data conversion.
+- [JWT Decoder](jwt.md) — unverified token and time-claim inspection.
+- [SQL Formatter](sql.md) — local formatting for ten SQL dialects.
+- [Cron Builder](cron.md) — five-field schedules and upcoming-run previews.
+- [curl → Code](curl.md) — non-executing safe-subset request code generation.
+- [JSON → TypeScript](json-types.md) — deterministic declaration inference.
 
 ## Planned groups
 
-- Developer & data format
 - Date & time
 - Generators
 - Files & documents

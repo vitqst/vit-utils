@@ -157,4 +157,39 @@ describe("tool platform shell", () => {
       view.unmount();
     }
   });
+
+  it("shows all eight offline-ready Developer & Data tools on its group hub", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("link", { name: /developer & data/i }));
+
+    expect(window.location.pathname).toBe("/groups/developer");
+    expect(
+      screen.getByRole("heading", { name: /developer & data/i }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("Works offline")).toHaveLength(8);
+  });
+
+  it("opens every Developer & Data tool from its stable direct route", async () => {
+    const routes = [
+      ["/tools/json", "JSON formatter"],
+      ["/tools/base64", "Base64"],
+      ["/tools/data-convert", "JSON ↔ YAML ↔ CSV"],
+      ["/tools/jwt", "JWT decoder"],
+      ["/tools/sql", "SQL formatter"],
+      ["/tools/cron", "Cron builder"],
+      ["/tools/curl", "curl → code"],
+      ["/tools/json-types", "JSON → TypeScript"],
+    ] as const;
+
+    for (const [path, heading] of routes) {
+      window.history.replaceState({}, "", path);
+      const view = render(<App />);
+
+      expect(
+        await screen.findByRole("heading", { name: heading, level: 1 }),
+      ).toBeInTheDocument();
+      view.unmount();
+    }
+  });
 });
