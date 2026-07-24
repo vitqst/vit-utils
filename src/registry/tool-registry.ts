@@ -113,6 +113,14 @@ export const toolRegistry = [
     load: () => import("../tools/barcode"),
   },
   {
+    ...catalogEntry("mock"),
+    load: () => import("../tools/mock"),
+  },
+  {
+    ...catalogEntry("meta"),
+    load: () => import("../tools/meta"),
+  },
+  {
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },

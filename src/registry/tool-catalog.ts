@@ -347,6 +347,7 @@ export const toolCatalog = [
       "Tạo tên, địa chỉ, ngày tháng và bản ghi mẫu có thể tùy chỉnh.",
     ),
     { en: ["mock", "fake data", "sample", "JSON"], vi: ["dữ liệu giả", "mẫu", "JSON"] },
+    "ready",
   ),
   tool(
     "meta",
@@ -357,6 +358,7 @@ export const toolCatalog = [
       "Tạo metadata trang và xem trước thẻ mạng xã hội Open Graph.",
     ),
     { en: ["meta tags", "Open Graph", "SEO", "preview"], vi: ["meta", "Open Graph", "SEO", "xem trước"] },
+    "ready",
   ),
   tool(
     "favicon",
