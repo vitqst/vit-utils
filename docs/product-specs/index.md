@@ -19,10 +19,15 @@
 - [Cron Builder](cron.md) — five-field schedules and upcoming-run previews.
 - [curl → Code](curl.md) — non-executing safe-subset request code generation.
 - [JSON → TypeScript](json-types.md) — deterministic declaration inference.
+- [Unix Timestamp](timestamp.md) — seconds/milliseconds and local date conversion.
+- [Vietnamese Lunar Calendar](lunar.md) — UTC+7 Gregorian/lunar conversion.
+- [Timezone Converter](timezone.md) — DST-aware IANA wall-time comparison.
+- [Date Difference](date-diff.md) — calendar and exact elapsed differences.
+- [Duration Humanizer](duration.md) — milliseconds, seconds, clock, and readable forms.
+- [Working Days](working-days.md) — configurable inclusive workday counts.
 
 ## Planned groups
 
-- Date & time
 - Generators
 - Files & documents
 - Security

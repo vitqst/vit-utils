@@ -192,4 +192,37 @@ describe("tool platform shell", () => {
       view.unmount();
     }
   });
+
+  it("shows all six offline-ready Date & Time tools on its group hub", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("link", { name: /date & time/i }));
+
+    expect(window.location.pathname).toBe("/groups/date-time");
+    expect(
+      screen.getByRole("heading", { name: /date & time/i }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("Works offline")).toHaveLength(6);
+  });
+
+  it("opens every Date & Time tool from its stable direct route", async () => {
+    const routes = [
+      ["/tools/timestamp", "Unix timestamp"],
+      ["/tools/lunar", "Lunar calendar"],
+      ["/tools/timezone", "Timezone converter"],
+      ["/tools/date-diff", "Date difference"],
+      ["/tools/duration", "Duration humanizer"],
+      ["/tools/working-days", "Working days"],
+    ] as const;
+
+    for (const [path, heading] of routes) {
+      window.history.replaceState({}, "", path);
+      const view = render(<App />);
+
+      expect(
+        await screen.findByRole("heading", { name: heading, level: 1 }),
+      ).toBeInTheDocument();
+      view.unmount();
+    }
+  });
 });
