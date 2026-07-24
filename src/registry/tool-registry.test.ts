@@ -175,7 +175,7 @@ describe("tool registry", () => {
   });
 
   it("exposes implemented Files & Documents tools as lazy routes", () => {
-    const readyFileIds = ["pdf", "pdf-image"];
+    const readyFileIds = ["pdf", "pdf-image", "sheets"];
     const readyFileTools = toolRegistry.filter((tool) => tool.group === "files");
 
     expect(readyFileTools.map((tool) => tool.id)).toEqual(readyFileIds);

@@ -402,6 +402,7 @@ export const toolCatalog = [
       "Chuyển đổi CSV và bảng tính Excel cục bộ với bản xem trước sheet.",
     ),
     { en: ["CSV", "XLSX", "Excel", "spreadsheet"], vi: ["CSV", "XLSX", "Excel", "bảng tính"] },
+    "ready",
   ),
   tool(
     "zip",
