@@ -225,4 +225,38 @@ describe("tool platform shell", () => {
       view.unmount();
     }
   });
+
+  it("shows all seven offline-ready Generator tools on its group hub", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("link", { name: /generators/i }));
+
+    expect(window.location.pathname).toBe("/groups/generators");
+    expect(
+      screen.getByRole("heading", { name: /generators/i }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("Works offline")).toHaveLength(7);
+  });
+
+  it("opens every Generator tool from its stable direct route", async () => {
+    const routes = [
+      ["/tools/ids", "UUID / ULID / NanoID"],
+      ["/tools/password", "Password generator"],
+      ["/tools/qr", "QR code"],
+      ["/tools/barcode", "Barcode"],
+      ["/tools/mock", "Mock data"],
+      ["/tools/meta", "Meta tags & OG preview"],
+      ["/tools/favicon", "Favicon set"],
+    ] as const;
+
+    for (const [path, heading] of routes) {
+      window.history.replaceState({}, "", path);
+      const view = render(<App />);
+
+      expect(
+        await screen.findByRole("heading", { name: heading, level: 1 }),
+      ).toBeInTheDocument();
+      view.unmount();
+    }
+  });
 });

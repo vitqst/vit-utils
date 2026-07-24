@@ -25,10 +25,16 @@
 - [Date Difference](date-diff.md) — calendar and exact elapsed differences.
 - [Duration Humanizer](duration.md) — milliseconds, seconds, clock, and readable forms.
 - [Working Days](working-days.md) — configurable inclusive workday counts.
+- [UUID / ULID / NanoID](ids.md) — cryptographically random browser-local identifiers.
+- [Password Generator](password.md) — passwords and passphrases with entropy estimates.
+- [QR Code](qr.md) — text, URL, Wi-Fi, and contact QR images.
+- [Barcode](barcode.md) — validated SVG barcodes in five common formats.
+- [Mock Data](mock.md) — seeded bilingual JSON and CSV sample records.
+- [Meta Tags & OG Preview](meta.md) — escaped metadata and a non-fetching preview.
+- [Favicon Set](favicon.md) — cancellable local icon resizing and ZIP packaging.
 
 ## Planned groups
 
-- Generators
 - Files & documents
 - Security
 - Media
