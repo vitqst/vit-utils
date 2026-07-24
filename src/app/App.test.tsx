@@ -121,7 +121,7 @@ describe("tool platform shell", () => {
       screen.getByRole("heading", { name: /text & string/i }),
     ).toBeInTheDocument();
     expect(screen.getAllByText("Case converter").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Planned").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Works offline")).toHaveLength(8);
   });
 
   it("routes a ready sidebar item to its own tool instead of Photo Cure", async () => {
@@ -133,5 +133,28 @@ describe("tool platform shell", () => {
     expect(
       await screen.findByRole("heading", { name: "Case converter", level: 1 }),
     ).toBeInTheDocument();
+  });
+
+  it("opens every Text & String tool from its stable direct route", async () => {
+    const routes = [
+      ["/tools/case-convert", "Case converter"],
+      ["/tools/slugify", "Slug & Vietnamese accents"],
+      ["/tools/diff", "Text diff"],
+      ["/tools/word-count", "Word & character count"],
+      ["/tools/line-tools", "Sort & dedupe lines"],
+      ["/tools/regex", "Regex tester"],
+      ["/tools/lorem", "Lorem Ipsum"],
+      ["/tools/unicode", "Unicode inspector"],
+    ] as const;
+
+    for (const [path, heading] of routes) {
+      window.history.replaceState({}, "", path);
+      const view = render(<App />);
+
+      expect(
+        await screen.findByRole("heading", { name: heading, level: 1 }),
+      ).toBeInTheDocument();
+      view.unmount();
+    }
   });
 });
