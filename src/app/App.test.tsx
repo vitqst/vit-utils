@@ -6,7 +6,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
 
 vi.mock("../tools/photo-cure", () => ({
-  default: () => <div>Photo Cure workspace</div>,
+  default: ({ locale }: { locale: "en" | "vi" }) => (
+    <div>Photo Cure workspace ({locale})</div>
+  ),
 }));
 
 describe("tool platform shell", () => {
@@ -35,7 +37,7 @@ describe("tool platform shell", () => {
 
     await waitFor(() => {
       expect(window.location.pathname).toBe("/tools/photo-cure");
-      expect(screen.getByText("Photo Cure workspace")).toBeInTheDocument();
+      expect(screen.getByText("Photo Cure workspace (en)")).toBeInTheDocument();
     });
     expect(screen.getAllByText(/local-only/i).length).toBeGreaterThan(0);
   });
@@ -74,10 +76,21 @@ describe("tool platform shell", () => {
 
     fireEvent.click(screen.getByRole("link", { name: /photo cure/i }));
 
-    await screen.findByText("Photo Cure workspace");
+    await screen.findByText("Photo Cure workspace (en)");
     expect(screen.getByRole("navigation", { name: /recent/i })).toHaveTextContent(
       "Photo Cure",
     );
+  });
+
+  it("passes the active locale to a lazy tool module", async () => {
+    window.history.replaceState({}, "", "/tools/photo-cure");
+    render(<App />);
+
+    expect(await screen.findByText("Photo Cure workspace (en)")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /tiếng việt/i }));
+
+    expect(await screen.findByText("Photo Cure workspace (vi)")).toBeInTheDocument();
   });
 
   it("uses the Vietnamese-first reference layout for a new visitor", () => {
