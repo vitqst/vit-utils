@@ -124,6 +124,7 @@ export const toolCatalog = [
       en: ["lorem ipsum", "placeholder", "generator", "paragraph"],
       vi: ["lorem ipsum", "văn bản mẫu", "tạo đoạn văn"],
     },
+    "ready",
   ),
   tool(
     "unicode",
@@ -137,6 +138,7 @@ export const toolCatalog = [
       en: ["Unicode", "code point", "UTF-16", "grapheme", "invisible"],
       vi: ["Unicode", "mã ký tự", "UTF-16", "ký tự vô hình"],
     },
+    "ready",
   ),
   tool(
     "json",

@@ -33,6 +33,14 @@ export const toolRegistry = [
     load: () => import("../tools/regex"),
   },
   {
+    ...catalogEntry("lorem"),
+    load: () => import("../tools/lorem"),
+  },
+  {
+    ...catalogEntry("unicode"),
+    load: () => import("../tools/unicode"),
+  },
+  {
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },

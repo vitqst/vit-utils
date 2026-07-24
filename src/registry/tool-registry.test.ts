@@ -91,6 +91,8 @@ describe("tool registry", () => {
       "word-count",
       "line-tools",
       "regex",
+      "lorem",
+      "unicode",
     ];
     const readyTextTools = toolRegistry.filter((tool) => tool.group === "text");
 
