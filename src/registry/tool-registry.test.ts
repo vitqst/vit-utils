@@ -150,6 +150,22 @@ describe("tool registry", () => {
     });
   });
 
+  it("exposes implemented Generator tools as lazy routes", () => {
+    const readyGeneratorIds = ["ids", "password"];
+    const readyGeneratorTools = toolRegistry.filter(
+      (tool) => tool.group === "generators",
+    );
+
+    expect(readyGeneratorTools.map((tool) => tool.id)).toEqual(
+      readyGeneratorIds,
+    );
+    readyGeneratorTools.forEach((tool) => {
+      expect(tool).toMatchObject({ status: "ready", group: "generators" });
+      expect(tool.load).toEqual(expect.any(Function));
+      expect(getToolByPath(tool.path)).toBe(tool);
+    });
+  });
+
   it("keeps registry ids and paths unique", () => {
     expect(new Set(toolCatalog.map((tool) => tool.id))).toHaveProperty(
       "size",

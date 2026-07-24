@@ -97,6 +97,14 @@ export const toolRegistry = [
     load: () => import("../tools/working-days"),
   },
   {
+    ...catalogEntry("ids"),
+    load: () => import("../tools/ids"),
+  },
+  {
+    ...catalogEntry("password"),
+    load: () => import("../tools/password"),
+  },
+  {
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },

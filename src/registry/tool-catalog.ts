@@ -303,6 +303,7 @@ export const toolCatalog = [
       "Tạo UUID, ULID và NanoID ngẫu nhiên bằng nguồn mật mã.",
     ),
     { en: ["UUID", "ULID", "NanoID", "identifier"], vi: ["UUID", "ULID", "NanoID", "định danh"] },
+    "ready",
   ),
   tool(
     "password",
@@ -313,6 +314,7 @@ export const toolCatalog = [
       "Tạo mật khẩu hoặc cụm mật khẩu mạnh với tùy chọn ký tự rõ ràng.",
     ),
     { en: ["password", "passphrase", "random", "generator"], vi: ["mật khẩu", "cụm mật khẩu", "ngẫu nhiên"] },
+    "ready",
   ),
   tool(
     "qr",
