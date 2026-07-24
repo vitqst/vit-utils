@@ -40,6 +40,7 @@ export const toolCatalog = [
       en: ["case", "uppercase", "lowercase", "camel", "snake", "title"],
       vi: ["kiểu chữ", "chữ hoa", "chữ thường", "camel", "snake", "tiêu đề"],
     },
+    "ready",
   ),
   tool(
     "slugify",
@@ -53,6 +54,7 @@ export const toolCatalog = [
       en: ["slug", "url", "Vietnamese", "diacritics", "accents"],
       vi: ["slug", "url", "bỏ dấu", "tiếng Việt"],
     },
+    "ready",
   ),
   tool(
     "diff",

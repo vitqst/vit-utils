@@ -9,6 +9,14 @@ function catalogEntry(id: string) {
 
 export const toolRegistry = [
   {
+    ...catalogEntry("case-convert"),
+    load: () => import("../tools/case-convert"),
+  },
+  {
+    ...catalogEntry("slugify"),
+    load: () => import("../tools/slugify"),
+  },
+  {
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },

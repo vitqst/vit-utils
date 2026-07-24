@@ -266,7 +266,10 @@ function Sidebar({
               {open ? (
                 <div className="ml-[15px] border-l border-[var(--vt-border)] py-1 pl-2">
                   {group.tools.map((catalogTool) => {
-                    const ready = catalogTool.status === "ready";
+                    const readyTool = toolRegistry.find(
+                      (tool) => tool.id === catalogTool.id,
+                    );
+                    const ready = readyTool !== undefined;
                     const active = activeTool?.id === catalogTool.id;
                     return (
                       <button
@@ -274,7 +277,7 @@ function Sidebar({
                         type="button"
                         disabled={!ready}
                         title={ready ? undefined : t.planned}
-                        onClick={() => ready && onNavigate("/tools/photo-cure")}
+                        onClick={() => readyTool && onNavigate(readyTool.path)}
                         className={`flex h-[27px] w-full items-center rounded-md px-2 text-left text-[12.5px] ${
                           active
                             ? "bg-[var(--vt-bg-2)] font-semibold text-[var(--vt-accent)]"
@@ -358,7 +361,13 @@ function GroupCard({
   onFavorite: (toolId: string) => void;
 }) {
   const t = messages[locale];
-  const readyTool = group.tools.find((tool) => tool.status === "ready");
+  const readyTools = group.tools
+    .map((catalogTool) =>
+      toolRegistry.find((tool) => tool.id === catalogTool.id),
+    )
+    .filter(isDefined);
+  const readyTool = readyTools.length === 1 ? readyTools[0] : undefined;
+  const destination = readyTool?.path ?? `/groups/${group.id}`;
   const tall = group.id === "files" || group.id === "security";
   const cardHeight = tall ? "min-h-[121px]" : "min-h-[101px]";
   const content = (
@@ -387,10 +396,10 @@ function GroupCard({
   return (
     <article className="relative">
       <a
-        href={readyTool ? "/tools/photo-cure" : `/groups/${group.id}`}
+        href={destination}
         onClick={(event) => {
           event.preventDefault();
-          onNavigate(readyTool ? "/tools/photo-cure" : `/groups/${group.id}`);
+          onNavigate(destination);
         }}
         className={`block h-full rounded-xl border border-[var(--vt-border)] bg-[var(--vt-bg-1)] px-5 py-[18px] transition hover:-translate-y-px hover:border-[var(--vt-accent)] ${cardHeight}`}
       >

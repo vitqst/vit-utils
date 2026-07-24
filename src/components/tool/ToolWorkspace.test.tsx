@@ -1,8 +1,9 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
+  CopyButton,
   ToolActions,
   ToolGrid,
   ToolOutput,
@@ -72,4 +73,54 @@ describe("shared tool workspace", () => {
       expect(screen.getByRole("button", { name: action })).toBeInTheDocument();
     },
   );
+
+  it("copies a result and announces success", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+
+    render(
+      <CopyButton
+        value="local result"
+        label="Copy"
+        copiedLabel="Copied"
+        failedLabel="Copy failed"
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Copy" }));
+
+    expect(writeText).toHaveBeenCalledWith("local result");
+    expect(await screen.findByRole("status")).toHaveTextContent("Copied");
+  });
+
+  it("announces clipboard failures and disables empty results", async () => {
+    const writeText = vi.fn().mockRejectedValue(new Error("denied"));
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+
+    const { rerender } = render(
+      <CopyButton
+        value="local result"
+        label="Copy"
+        copiedLabel="Copied"
+        failedLabel="Copy failed"
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Copy" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("Copy failed");
+
+    rerender(
+      <CopyButton
+        value=""
+        label="Copy"
+        copiedLabel="Copied"
+        failedLabel="Copy failed"
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Copy" })).toBeDisabled();
+  });
 });

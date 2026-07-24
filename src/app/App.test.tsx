@@ -123,4 +123,15 @@ describe("tool platform shell", () => {
     expect(screen.getAllByText("Case converter").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Planned").length).toBeGreaterThan(0);
   });
+
+  it("routes a ready sidebar item to its own tool instead of Photo Cure", async () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: /case converter/i }));
+
+    expect(window.location.pathname).toBe("/tools/case-convert");
+    expect(
+      await screen.findByRole("heading", { name: "Case converter", level: 1 }),
+    ).toBeInTheDocument();
+  });
 });

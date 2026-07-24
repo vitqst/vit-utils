@@ -83,6 +83,24 @@ describe("tool registry", () => {
     expect(getToolByPath("/tools/photo-cure/")).toBe(photoCure);
   });
 
+  it("exposes implemented text tools as lazy routes", () => {
+    const caseConvert = getToolByPath("/tools/case-convert");
+    const slugify = getToolByPath("/tools/slugify");
+
+    expect(caseConvert).toMatchObject({
+      id: "case-convert",
+      group: "text",
+      status: "ready",
+    });
+    expect(slugify).toMatchObject({
+      id: "slugify",
+      group: "text",
+      status: "ready",
+    });
+    expect(caseConvert?.load).toEqual(expect.any(Function));
+    expect(slugify?.load).toEqual(expect.any(Function));
+  });
+
   it("keeps registry ids and paths unique", () => {
     expect(new Set(toolCatalog.map((tool) => tool.id))).toHaveProperty(
       "size",

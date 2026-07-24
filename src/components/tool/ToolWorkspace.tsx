@@ -4,6 +4,7 @@ import type {
   ReactNode,
   TextareaHTMLAttributes,
 } from "react";
+import { useState } from "react";
 
 interface ToolWorkspaceProps {
   title: string;
@@ -134,5 +135,55 @@ export function ToolOutput({
       )}
       {children}
     </section>
+  );
+}
+
+interface CopyButtonProps {
+  value: string;
+  label: string;
+  copiedLabel: string;
+  failedLabel: string;
+}
+
+export function CopyButton({
+  value,
+  label,
+  copiedLabel,
+  failedLabel,
+}: CopyButtonProps) {
+  const [status, setStatus] = useState<"copied" | "failed" | null>(null);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setStatus("copied");
+    } catch {
+      setStatus("failed");
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        disabled={!value}
+        onClick={copy}
+        className="rounded-lg border border-[var(--vt-border-2)] bg-[var(--vt-bg-2)] px-3 py-2 text-xs font-semibold text-[var(--vt-text)] hover:border-[var(--vt-accent)] disabled:opacity-50"
+      >
+        {label}
+      </button>
+      {status ? (
+        <span
+          role="status"
+          className={`text-xs ${
+            status === "copied"
+              ? "text-[var(--vt-green)]"
+              : "text-[var(--vt-red)]"
+          }`}
+        >
+          {status === "copied" ? copiedLabel : failedLabel}
+        </span>
+      ) : null}
+    </div>
   );
 }
