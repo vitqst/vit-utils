@@ -49,6 +49,14 @@ export const toolRegistry = [
     load: () => import("../tools/base64"),
   },
   {
+    ...catalogEntry("data-convert"),
+    load: () => import("../tools/data-convert"),
+  },
+  {
+    ...catalogEntry("jwt"),
+    load: () => import("../tools/jwt"),
+  },
+  {
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },

@@ -112,9 +112,10 @@ bounded text inputs remain interactive.
    ```
 
 4. Implement CSV state-machine parsing/stringifying and YAML
-   `parseDocument(..., { uniqueKeys: true, maxAliasCount: 100 })`; inspect
-   `doc.errors` before `toJS()`. Use `YAML.stringify(value, { schema: "json",
-   lineWidth: 0 })`.
+   `parseDocument(..., { uniqueKeys: true })`; inspect `doc.errors` before
+   `toJS({ maxAliasCount: 100 })`, then reject values outside JSON-compatible
+   primitives, arrays, and string-keyed objects. Use
+   `YAML.stringify(value, { lineWidth: 0 })`.
 5. Test and implement source/target selectors, swap, localized errors, result copy,
    and download with the correct extension.
 6. Specify JWT decoding as inspection without signature verification. Support

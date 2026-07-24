@@ -171,6 +171,7 @@ export const toolCatalog = [
       "Chuyển đổi dữ liệu có cấu trúc giữa JSON, YAML và CSV.",
     ),
     { en: ["JSON", "YAML", "CSV", "convert"], vi: ["JSON", "YAML", "CSV", "chuyển đổi"] },
+    "ready",
   ),
   tool(
     "jwt",
@@ -181,6 +182,7 @@ export const toolCatalog = [
       "Giải mã header, payload JWT và xem các claim thời gian mà không xác minh chữ ký.",
     ),
     { en: ["JWT", "token", "decode", "claims"], vi: ["JWT", "token", "giải mã", "claim"] },
+    "ready",
   ),
   tool(
     "sql",
