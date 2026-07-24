@@ -68,6 +68,7 @@ export const toolCatalog = [
       en: ["diff", "compare", "text", "lines", "changes"],
       vi: ["so sánh", "văn bản", "dòng", "thay đổi"],
     },
+    "ready",
   ),
   tool(
     "word-count",
@@ -81,6 +82,7 @@ export const toolCatalog = [
       en: ["word count", "characters", "sentences", "reading time"],
       vi: ["đếm từ", "ký tự", "câu", "thời gian đọc"],
     },
+    "ready",
   ),
   tool(
     "line-tools",

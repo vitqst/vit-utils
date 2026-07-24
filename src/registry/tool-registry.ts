@@ -17,6 +17,14 @@ export const toolRegistry = [
     load: () => import("../tools/slugify"),
   },
   {
+    ...catalogEntry("diff"),
+    load: () => import("../tools/diff"),
+  },
+  {
+    ...catalogEntry("word-count"),
+    load: () => import("../tools/word-count"),
+  },
+  {
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },

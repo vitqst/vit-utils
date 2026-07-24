@@ -84,21 +84,20 @@ describe("tool registry", () => {
   });
 
   it("exposes implemented text tools as lazy routes", () => {
-    const caseConvert = getToolByPath("/tools/case-convert");
-    const slugify = getToolByPath("/tools/slugify");
+    const readyTextIds = [
+      "case-convert",
+      "slugify",
+      "diff",
+      "word-count",
+    ];
+    const readyTextTools = toolRegistry.filter((tool) => tool.group === "text");
 
-    expect(caseConvert).toMatchObject({
-      id: "case-convert",
-      group: "text",
-      status: "ready",
+    expect(readyTextTools.map((tool) => tool.id)).toEqual(readyTextIds);
+    readyTextTools.forEach((tool) => {
+      expect(tool).toMatchObject({ status: "ready", group: "text" });
+      expect(tool.load).toEqual(expect.any(Function));
+      expect(getToolByPath(tool.path)).toBe(tool);
     });
-    expect(slugify).toMatchObject({
-      id: "slugify",
-      group: "text",
-      status: "ready",
-    });
-    expect(caseConvert?.load).toEqual(expect.any(Function));
-    expect(slugify?.load).toEqual(expect.any(Function));
   });
 
   it("keeps registry ids and paths unique", () => {
