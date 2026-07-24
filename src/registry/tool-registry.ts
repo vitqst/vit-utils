@@ -168,6 +168,10 @@ export const toolRegistry = [
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },
+  {
+    ...catalogEntry("photo-collage"),
+    load: () => import("../tools/photo-collage"),
+  },
 ] satisfies ToolDefinition[];
 
 function normalizePath(path: string) {

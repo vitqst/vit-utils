@@ -122,6 +122,13 @@ type WorkerResponse =
     }
   | { type: "error"; id: number; message?: string };
 
+type CollageStatus =
+  | { type: "processing" }
+  | { type: "progress"; completed: number; total: number }
+  | { type: "ready"; width: number; height: number }
+  | { type: "cancelled" }
+  | null;
+
 export default function PhotoCollageTool({ locale }: ToolComponentProps) {
   const t = copy[locale];
   const [images, setImages] = useState<ImageItem[]>([]);
@@ -131,8 +138,9 @@ export default function PhotoCollageTool({ locale }: ToolComponentProps) {
   const [background, setBackground] = useState("#ffffff");
   const [width, setWidth] = useState(1200);
   const [format, setFormat] = useState<CollageFormat>("image/png");
+  const [resultFormat, setResultFormat] = useState<CollageFormat | null>(null);
   const [running, setRunning] = useState(false);
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState<CollageStatus>(null);
   const [error, setError] = useState("");
   const [previewUrl, setPreviewUrl] = useState("");
   const [inputKey, setInputKey] = useState(0);
@@ -150,6 +158,7 @@ export default function PhotoCollageTool({ locale }: ToolComponentProps) {
     if (urlRef.current) URL.revokeObjectURL(urlRef.current);
     urlRef.current = "";
     setPreviewUrl("");
+    setResultFormat(null);
   };
 
   useEffect(
@@ -162,7 +171,7 @@ export default function PhotoCollageTool({ locale }: ToolComponentProps) {
 
   const selectImages = (files: FileList | null) => {
     setError("");
-    setStatus("");
+    setStatus(null);
     revokePreview();
     const selected = Array.from(files ?? []);
     if (selected.length > MAX_COLLAGE_IMAGES) {
@@ -227,7 +236,7 @@ export default function PhotoCollageTool({ locale }: ToolComponentProps) {
     stopWorker();
     revokePreview();
     setRunning(true);
-    setStatus(t.processing);
+    setStatus({ type: "processing" });
     try {
       const buffers = await Promise.all(
         images.map((item) => item.file.arrayBuffer()),
@@ -242,7 +251,11 @@ export default function PhotoCollageTool({ locale }: ToolComponentProps) {
         const response = event.data;
         if (response.id !== id) return;
         if (response.type === "progress") {
-          setStatus(`${t.processing} ${response.completed}/${response.total}`);
+          setStatus({
+            type: "progress",
+            completed: response.completed,
+            total: response.total,
+          });
           return;
         }
         setRunning(false);
@@ -251,15 +264,22 @@ export default function PhotoCollageTool({ locale }: ToolComponentProps) {
           const url = URL.createObjectURL(response.blob);
           urlRef.current = url;
           setPreviewUrl(url);
-          setStatus(t.ready(response.width, response.height));
+          setResultFormat(
+            response.blob.type === "image/jpeg" ? "image/jpeg" : "image/png",
+          );
+          setStatus({
+            type: "ready",
+            width: response.width,
+            height: response.height,
+          });
         } else {
-          setStatus("");
+          setStatus(null);
           setError(response.message || t.failed);
         }
       };
       worker.onerror = () => {
         setRunning(false);
-        setStatus("");
+        setStatus(null);
         setError(t.failed);
         stopWorker();
       };
@@ -278,7 +298,7 @@ export default function PhotoCollageTool({ locale }: ToolComponentProps) {
       );
     } catch {
       setRunning(false);
-      setStatus("");
+      setStatus(null);
       setError(t.failed);
     }
   };
@@ -288,7 +308,7 @@ export default function PhotoCollageTool({ locale }: ToolComponentProps) {
     operationRef.current += 1;
     stopWorker();
     setRunning(false);
-    setStatus(t.cancelled);
+    setStatus({ type: "cancelled" });
   };
 
   const reset = () => {
@@ -303,14 +323,26 @@ export default function PhotoCollageTool({ locale }: ToolComponentProps) {
     setWidth(1200);
     setFormat("image/png");
     setRunning(false);
-    setStatus("");
+    setStatus(null);
     setError("");
     setInputKey((current) => current + 1);
   };
 
-  const downloadName = format === "image/png" ? "collage.png" : "collage.jpg";
+  const downloadFormat = resultFormat ?? format;
+  const downloadName =
+    downloadFormat === "image/png" ? "collage.png" : "collage.jpg";
   const downloadLabel =
-    format === "image/png" ? t.downloadPng : t.downloadJpeg;
+    downloadFormat === "image/png" ? t.downloadPng : t.downloadJpeg;
+  const statusText =
+    status?.type === "ready"
+      ? t.ready(status.width, status.height)
+      : status?.type === "progress"
+        ? `${t.processing} ${status.completed}/${status.total}`
+        : status?.type === "processing"
+          ? t.processing
+          : status?.type === "cancelled"
+            ? t.cancelled
+            : "";
   const controlClass =
     "mt-1.5 w-full rounded-lg border border-[var(--vt-border)] bg-[var(--vt-bg-0)] px-3 py-2 text-sm text-[var(--vt-text)]";
 
@@ -480,9 +512,9 @@ export default function PhotoCollageTool({ locale }: ToolComponentProps) {
         </ToolPanel>
 
         <ToolPanel title={t.output}>
-          {status ? (
+          {statusText ? (
             <p role="status" aria-live="polite" className="mb-3 text-sm">
-              {status}
+              {statusText}
             </p>
           ) : null}
           {previewUrl ? (
@@ -508,4 +540,3 @@ export default function PhotoCollageTool({ locale }: ToolComponentProps) {
     </ToolWorkspace>
   );
 }
-

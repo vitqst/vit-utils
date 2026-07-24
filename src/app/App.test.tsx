@@ -33,7 +33,8 @@ describe("tool platform shell", () => {
   it("opens a registry tool at its stable URL and lazy loads its module", async () => {
     render(<App />);
 
-    fireEvent.click(screen.getByRole("link", { name: /photo cure/i }));
+    fireEvent.click(screen.getByRole("link", { name: /media/i }));
+    fireEvent.click(screen.getByRole("link", { name: /^photo cure/i }));
 
     await waitFor(() => {
       expect(window.location.pathname).toBe("/tools/photo-cure");
@@ -67,14 +68,13 @@ describe("tool platform shell", () => {
   });
 
   it("persists favorites and shows a recently opened tool in navigation", async () => {
+    window.history.replaceState({}, "", "/tools/photo-cure");
     render(<App />);
 
     fireEvent.click(screen.getByRole("button", { name: /add to favorites/i }));
     expect(JSON.parse(window.localStorage.getItem("vit.favorites") ?? "[]")).toEqual([
       "photo-cure",
     ]);
-
-    fireEvent.click(screen.getByRole("link", { name: /photo cure/i }));
 
     await screen.findByText("Photo Cure workspace (en)");
     expect(screen.getByRole("navigation", { name: /recent/i })).toHaveTextContent(
@@ -323,6 +323,28 @@ describe("tool platform shell", () => {
       ).toBeInTheDocument();
       view.unmount();
     }
+  });
+
+  it("shows both offline-ready Media tools on its group hub", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("link", { name: /media/i }));
+
+    expect(window.location.pathname).toBe("/groups/media");
+    expect(screen.getByRole("heading", { name: /media/i })).toBeInTheDocument();
+    expect(screen.getAllByText("Works offline")).toHaveLength(2);
+  });
+
+  it("opens Photo Collage from its stable direct route", async () => {
+    window.history.replaceState({}, "", "/tools/photo-collage");
+    render(<App />);
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Photo collage",
+        level: 1,
+      }),
+    ).toBeInTheDocument();
   });
 
   it("discloses the HIBP network exception in the route chrome", async () => {

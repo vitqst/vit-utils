@@ -18,8 +18,9 @@ without uploading the source images.
 
 - Grid uses approximately square rows and columns. Horizontal uses one row;
   vertical uses one column.
-- Cells are square. Fill crops each source around its center. Fit preserves the
-  whole source and leaves the selected background visible.
+- Full rows use square cells; an incomplete final grid row expands its remaining
+  cells across the output width. Fill crops each source around its center. Fit
+  preserves the whole source and leaves the selected background visible.
 - Output width is 320–4096 pixels, gap is 0–128 pixels, and total canvas area is
   capped at 24 megapixels.
 - A new render replaces and revokes the previous preview URL.
@@ -42,4 +43,3 @@ without uploading the source images.
 - Freeform positioning, layers, text, stickers, filters, and remote image URLs.
 - Animated image output or preservation of image metadata.
 - Color-profile conversion beyond browser canvas behavior.
-

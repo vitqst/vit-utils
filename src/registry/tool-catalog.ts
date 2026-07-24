@@ -506,5 +506,6 @@ export const toolCatalog = [
       "Sắp xếp ảnh cục bộ thành ảnh ghép tùy chỉnh để tải xuống.",
     ),
     { en: ["photo", "collage", "grid", "image"], vi: ["ảnh", "ghép ảnh", "lưới", "collage"] },
+    "ready",
   ),
 ] satisfies ToolCatalogEntry[];

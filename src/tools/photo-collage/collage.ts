@@ -70,19 +70,26 @@ export function layoutCollage(options: {
   if (baseCellSize < 1) {
     throw new Error("Gap leaves no room for collage images.");
   }
-  const finalColumnExtra = availableWidth - baseCellSize * columns;
   const height = rows * baseCellSize + options.gap * (rows - 1);
   if (options.width * height > MAX_COLLAGE_PIXELS) {
     throw new Error("The collage cannot exceed 24 megapixels.");
   }
 
   const cells = Array.from({ length: options.count }, (_, index) => {
-    const column = index % columns;
     const row = Math.floor(index / columns);
+    const rowStart = row * columns;
+    const rowColumns = Math.min(columns, options.count - rowStart);
+    const column = index - rowStart;
+    const rowAvailableWidth =
+      options.width - options.gap * (rowColumns - 1);
+    const rowCellWidth = Math.floor(rowAvailableWidth / rowColumns);
+    const rowFinalColumnExtra =
+      rowAvailableWidth - rowCellWidth * rowColumns;
     const width =
-      baseCellSize + (column === columns - 1 ? finalColumnExtra : 0);
+      rowCellWidth +
+      (column === rowColumns - 1 ? rowFinalColumnExtra : 0);
     return {
-      x: column * (baseCellSize + options.gap),
+      x: column * (rowCellWidth + options.gap),
       y: row * (baseCellSize + options.gap),
       width,
       height: baseCellSize,
@@ -162,4 +169,3 @@ export function fillSourceRect(
     height,
   };
 }
-

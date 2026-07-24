@@ -42,9 +42,8 @@
 - [Breach Check (HIBP)](hibp.md) — disclosed k-anonymity prefix lookup.
 - [X.509 Decoder](certificate.md) — local PEM and DER field inspection.
 - [HMAC](hmac.md) — local Web Crypto message signatures.
+- [Photo Collage](photo-collage.md) — cancellable local grid composition.
 
-## Planned groups
+## Catalog coverage
 
-- Media
-
-Planned tool names remain in `docs/requirements/20260721-init-app.md`. A tool receives its own product specification before implementation.
+All 41 catalog tools have a shipped product specification and lazy route.

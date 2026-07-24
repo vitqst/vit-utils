@@ -83,6 +83,26 @@ describe("tool registry", () => {
     expect(getToolByPath("/tools/photo-cure/")).toBe(photoCure);
   });
 
+  it("exposes both implemented Media tools as lazy routes", () => {
+    const readyMediaTools = toolRegistry.filter(
+      (tool) => tool.group === "media",
+    );
+
+    expect(readyMediaTools.map((tool) => tool.id)).toEqual([
+      "photo-cure",
+      "photo-collage",
+    ]);
+    readyMediaTools.forEach((tool) => {
+      expect(tool).toMatchObject({
+        status: "ready",
+        group: "media",
+        privacy: "local-only",
+      });
+      expect(tool.load).toEqual(expect.any(Function));
+      expect(getToolByPath(tool.path)).toBe(tool);
+    });
+  });
+
   it("exposes implemented text tools as lazy routes", () => {
     const readyTextIds = [
       "case-convert",

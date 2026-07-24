@@ -62,6 +62,21 @@ describe("photo collage geometry", () => {
     });
   });
 
+  it("expands an incomplete grid row across the available width", () => {
+    expect(
+      layoutCollage({
+        layout: "grid",
+        count: 3,
+        width: 1200,
+        gap: 16,
+      }).cells,
+    ).toEqual([
+      { x: 0, y: 0, width: 592, height: 592 },
+      { x: 608, y: 0, width: 592, height: 592 },
+      { x: 0, y: 608, width: 1200, height: 592 },
+    ]);
+  });
+
   it("centers fit and fill rectangles without changing aspect ratio", () => {
     expect(fitDestinationRect(400, 200, 100, 100)).toEqual({
       x: 0,
@@ -100,4 +115,3 @@ describe("photo collage geometry", () => {
     ).toThrow("24 megapixels");
   });
 });
-

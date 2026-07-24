@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import PhotoCollageTool from "./PhotoCollageTool";
@@ -66,23 +72,36 @@ describe("Photo collage tool", () => {
       expect.any(Array),
     );
 
-    worker.onmessage?.(
-      new MessageEvent("message", {
-        data: {
-          type: "result",
-          id: 1,
-          blob: new Blob(["collage"], { type: "image/png" }),
-          width: 900,
-          height: 900,
-        },
-      }),
-    );
+    act(() => {
+      worker.onmessage?.(
+        new MessageEvent("message", {
+          data: {
+            type: "result",
+            id: 1,
+            blob: new Blob(["collage"], { type: "image/png" }),
+            width: 900,
+            height: 900,
+          },
+        }),
+      );
+    });
     expect(
       await screen.findByRole("img", { name: "Rendered photo collage" }),
     ).toHaveAttribute("src", "blob:photo-collage");
     expect(
       screen.getByRole("link", { name: "Download collage.png" }),
     ).toHaveAttribute("download", "collage.png");
+    fireEvent.change(screen.getByLabelText("Format"), {
+      target: { value: "image/jpeg" },
+    });
+    expect(
+      screen.getByRole("link", { name: "Download collage.png" }),
+    ).toHaveAttribute("download", "collage.png");
+
+    view.rerender(<PhotoCollageTool locale="vi" />);
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Ảnh ghép sẵn sàng · 900×900",
+    );
 
     view.unmount();
     expect(worker.terminate).toHaveBeenCalled();
@@ -123,4 +142,3 @@ describe("Photo collage tool", () => {
     expect(screen.getByRole("status")).toHaveTextContent(/đã hủy/i);
   });
 });
-

@@ -632,10 +632,14 @@ function GroupPage({
 function ToolPage({
   tool,
   locale,
+  favorite,
+  onFavorite,
   onNavigate,
 }: {
   tool: ToolDefinition;
   locale: Locale;
+  favorite: boolean;
+  onFavorite: (toolId: string) => void;
   onNavigate: (path: string) => void;
 }) {
   const t = messages[locale];
@@ -655,7 +659,15 @@ function ToolPage({
         <span className="text-[11px] font-semibold text-[var(--vt-text)]">
           {tool.name[locale]}
         </span>
-        <span className={`ml-auto flex items-center gap-1.5 rounded-full border border-[var(--vt-border)] bg-[var(--vt-bg-1)] px-2.5 py-1 font-mono text-[9px] font-semibold ${tool.privacy === "network-prefix" ? "text-[var(--vt-yellow)]" : "text-[var(--vt-green)]"}`}>
+        <button
+          type="button"
+          onClick={() => onFavorite(tool.id)}
+          aria-label={favorite ? t.removeFavorite : t.addFavorite}
+          className="ml-auto grid h-7 w-7 place-items-center rounded-md text-[var(--vt-text-3)] hover:bg-[var(--vt-bg-2)] hover:text-[var(--vt-accent)]"
+        >
+          <StarIcon filled={favorite} className="h-4 w-4" />
+        </button>
+        <span className={`flex items-center gap-1.5 rounded-full border border-[var(--vt-border)] bg-[var(--vt-bg-1)] px-2.5 py-1 font-mono text-[9px] font-semibold ${tool.privacy === "network-prefix" ? "text-[var(--vt-yellow)]" : "text-[var(--vt-green)]"}`}>
           <ShieldIcon className="h-3 w-3" />
           {tool.privacy === "network-prefix" ? t.networkPrefix : t.localOnly}
         </span>
@@ -768,7 +780,13 @@ export default function App() {
           ) : group ? (
             <GroupPage group={group} locale={locale} onNavigate={navigate} />
           ) : tool ? (
-            <ToolPage tool={tool} locale={locale} onNavigate={navigate} />
+            <ToolPage
+              tool={tool}
+              locale={locale}
+              favorite={favorites.includes(tool.id)}
+              onFavorite={toggleFavorite}
+              onNavigate={navigate}
+            />
           ) : (
             <NotFound locale={locale} onNavigate={navigate} />
           )}
