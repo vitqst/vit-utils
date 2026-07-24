@@ -259,4 +259,36 @@ describe("tool platform shell", () => {
       view.unmount();
     }
   });
+
+  it("shows all five offline-ready Files & Documents tools on its group hub", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("link", { name: /files & documents/i }));
+
+    expect(window.location.pathname).toBe("/groups/files");
+    expect(
+      screen.getByRole("heading", { name: /files & documents/i }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("Works offline")).toHaveLength(5);
+  });
+
+  it("opens every Files & Documents tool from its stable direct route", async () => {
+    const routes = [
+      ["/tools/pdf", "Merge / split PDF"],
+      ["/tools/pdf-image", "PDF ↔ image"],
+      ["/tools/sheets", "CSV ↔ XLSX"],
+      ["/tools/zip", "Zip / unzip"],
+      ["/tools/checksum", "File checksum"],
+    ] as const;
+
+    for (const [path, heading] of routes) {
+      window.history.replaceState({}, "", path);
+      const view = render(<App />);
+
+      expect(
+        await screen.findByRole("heading", { name: heading, level: 1 }),
+      ).toBeInTheDocument();
+      view.unmount();
+    }
+  });
 });

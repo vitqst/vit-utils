@@ -32,10 +32,14 @@
 - [Mock Data](mock.md) — seeded bilingual JSON and CSV sample records.
 - [Meta Tags & OG Preview](meta.md) — escaped metadata and a non-fetching preview.
 - [Favicon Set](favicon.md) — cancellable local icon resizing and ZIP packaging.
+- [Merge / Split PDF](pdf.md) — ordered merge, page extraction, and rotation.
+- [PDF ↔ Image](pdf-image.md) — local PDF rendering and image-to-PDF conversion.
+- [CSV ↔ XLSX](sheets.md) — bounded spreadsheet conversion and preview.
+- [Zip / Unzip](zip.md) — archive creation and preflighted safe extraction.
+- [File Checksum](checksum.md) — chunked calculation and checksum verification.
 
 ## Planned groups
 
-- Files & documents
 - Security
 - Media
 
