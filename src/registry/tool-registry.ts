@@ -157,6 +157,14 @@ export const toolRegistry = [
     load: () => import("../tools/hibp"),
   },
   {
+    ...catalogEntry("certificate"),
+    load: () => import("../tools/certificate"),
+  },
+  {
+    ...catalogEntry("hmac"),
+    load: () => import("../tools/hmac"),
+  },
+  {
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },

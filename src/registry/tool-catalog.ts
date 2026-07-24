@@ -470,6 +470,7 @@ export const toolCatalog = [
       "Giải mã chứng chỉ X.509 PEM hoặc DER và xem các trường cục bộ.",
     ),
     { en: ["X.509", "certificate", "PEM", "DER"], vi: ["X.509", "chứng chỉ", "PEM", "DER"] },
+    "ready",
   ),
   tool(
     "hmac",
@@ -480,6 +481,7 @@ export const toolCatalog = [
       "Tính chữ ký HMAC cục bộ bằng các thuật toán băm tiêu chuẩn.",
     ),
     { en: ["HMAC", "signature", "SHA", "secret"], vi: ["HMAC", "chữ ký", "SHA", "bí mật"] },
+    "ready",
   ),
   tool(
     "photo-cure",

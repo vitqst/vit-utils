@@ -187,7 +187,13 @@ describe("tool registry", () => {
   });
 
   it("exposes implemented Security tools as lazy routes", () => {
-    const readySecurityIds = ["hash", "strength", "hibp"];
+    const readySecurityIds = [
+      "hash",
+      "strength",
+      "hibp",
+      "certificate",
+      "hmac",
+    ];
     const readySecurityTools = toolRegistry.filter(
       (tool) => tool.group === "security",
     );
