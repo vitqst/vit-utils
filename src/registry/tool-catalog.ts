@@ -424,6 +424,7 @@ export const toolCatalog = [
       "Tính và so sánh checksum cho tệp cục bộ mà không tải lên.",
     ),
     { en: ["checksum", "SHA-256", "file", "verify"], vi: ["checksum", "SHA-256", "tệp", "xác minh"] },
+    "ready",
   ),
   tool(
     "hash",
