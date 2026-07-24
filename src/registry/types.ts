@@ -1,0 +1,33 @@
+import type { ComponentType } from "react";
+
+export type Locale = "en" | "vi";
+export type ToolGroup =
+  | "text"
+  | "developer"
+  | "date-time"
+  | "generators"
+  | "files"
+  | "security"
+  | "media";
+
+export interface LocalizedText {
+  en: string;
+  vi: string;
+}
+
+export interface ToolModule {
+  default: ComponentType;
+}
+
+export interface ToolDefinition {
+  id: string;
+  group: ToolGroup;
+  name: LocalizedText;
+  description: LocalizedText;
+  keywords: Record<Locale, string[]>;
+  icon: "aperture";
+  path: `/tools/${string}`;
+  privacy: "local-only";
+  status: "ready";
+  load: () => Promise<ToolModule>;
+}

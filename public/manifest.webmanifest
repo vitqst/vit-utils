@@ -1,0 +1,10 @@
+{
+  "name": "vit.tools",
+  "short_name": "vit.tools",
+  "description": "Private, offline-first browser tools.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0c1117",
+  "theme_color": "#0c1117",
+  "lang": "en"
+}

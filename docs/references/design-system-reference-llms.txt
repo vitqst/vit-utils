@@ -1,0 +1,27 @@
+SOURCE
+docs/requirements/vit tools.dc.html
+
+SHELL
+- dark left navigation rail
+- white or warm-gray primary workspace
+- cyan accent for active/navigation states
+- emerald for privacy/success status
+- compact group labels and counts
+
+TYPOGRAPHY
+- humanist/system sans for interface copy
+- monospace for shortcuts, ids, counters, and machine-readable output
+- strong, short headings; restrained paragraph width
+
+INTERACTION
+- command palette is the fast path after the catalog grows
+- tool cards explain one job and expose one primary route
+- local-only privacy state stays visible on tool pages
+- English and Vietnamese are equal interface modes
+
+AVOID
+- remote font dependencies
+- card-inside-card layouts
+- tiny unreadable metadata
+- decorative controls without a user job
+- hand-maintained duplicate tool catalogs

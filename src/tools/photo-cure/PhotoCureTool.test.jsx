@@ -1,6 +1,6 @@
 import React from "react";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import App, { CullScreen, Fill, ReviewScreen, buildFromFiles } from "./app.jsx";
+import App, { CullScreen, Fill, ReviewScreen, buildFromFiles } from "./PhotoCureTool.jsx";
 
 function makeFile(index, lastModified = index * 3000) {
   return new File(["photo"], `IMG_${String(index).padStart(5, "0")}.JPG`, {

@@ -1,0 +1,126 @@
+@import "@fontsource/be-vietnam-pro/latin-400.css";
+@import "@fontsource/be-vietnam-pro/vietnamese-400.css";
+@import "@fontsource/be-vietnam-pro/latin-500.css";
+@import "@fontsource/be-vietnam-pro/vietnamese-500.css";
+@import "@fontsource/be-vietnam-pro/latin-600.css";
+@import "@fontsource/be-vietnam-pro/vietnamese-600.css";
+@import "@fontsource/be-vietnam-pro/latin-700.css";
+@import "@fontsource/be-vietnam-pro/vietnamese-700.css";
+@import "@fontsource/jetbrains-mono/latin-400.css";
+@import "@fontsource/jetbrains-mono/latin-500.css";
+@import "@fontsource/jetbrains-mono/latin-600.css";
+@import "tailwindcss";
+
+:root {
+  font-family:
+    "Be Vietnam Pro", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  line-height: normal;
+  color: var(--vt-text);
+  background: var(--vt-bg-0);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --bg: oklch(0.966 0.003 240);
+  --bg-2: oklch(0.94 0.004 240);
+  --panel: #ffffff;
+  --ink: oklch(0.24 0.012 255);
+  --muted: oklch(0.56 0.012 255);
+  --faint: oklch(0.72 0.008 255);
+  --line: oklch(0.9 0.004 255);
+  --line-2: oklch(0.84 0.005 255);
+  --keep: oklch(0.6 0.13 150);
+  --keep-soft: oklch(0.6 0.13 150 / 0.12);
+  --reject: oklch(0.6 0.17 25);
+  --reject-soft: oklch(0.6 0.17 25 / 0.12);
+  --maybe: oklch(0.68 0.11 80);
+  --ui: "Helvetica Neue", Helvetica, "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --shadow-card:
+    0 1px 2px rgb(20 22 28 / 0.06), 0 18px 40px -18px rgb(20 22 28 / 0.32),
+    0 40px 80px -40px rgb(20 22 28 / 0.28);
+  --r: 10px;
+  --vt-bg-0: #0b0e14;
+  --vt-bg-1: #11151d;
+  --vt-bg-2: #171c26;
+  --vt-bg-3: #1e2531;
+  --vt-border: #242c3a;
+  --vt-border-2: #334055;
+  --vt-text: #d7dce4;
+  --vt-text-2: #98a3b3;
+  --vt-text-3: #5d6b7e;
+  --vt-accent: #ffb454;
+  --vt-accent-ink: #2a1c05;
+  --vt-cyan: #59c2ff;
+  --vt-green: #7fd962;
+  --vt-red: #ff7676;
+}
+
+[data-theme="light"] {
+  --vt-bg-0: #f5f7fa;
+  --vt-bg-1: #ffffff;
+  --vt-bg-2: #eef1f6;
+  --vt-bg-3: #e3e8ef;
+  --vt-border: #dde3ec;
+  --vt-border-2: #c3ccda;
+  --vt-text: #1a2330;
+  --vt-text-2: #4b586a;
+  --vt-text-3: #8b96a6;
+  --vt-accent: #c96a00;
+  --vt-accent-ink: #ffffff;
+  --vt-cyan: #0969da;
+  --vt-green: #1a7f37;
+  --vt-red: #cf222e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+button,
+input,
+textarea {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+::selection {
+  color: var(--vt-accent-ink);
+  background: var(--vt-accent);
+}
+
+[data-bg="warm"] {
+  --bg: oklch(0.967 0.006 70);
+  --bg-2: oklch(0.94 0.008 70);
+}
+
+[data-bg="paper"] {
+  --bg: oklch(0.95 0.009 95);
+  --bg-2: oklch(0.92 0.011 95);
+}
+
+.grain::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  border-radius: inherit;
+}
