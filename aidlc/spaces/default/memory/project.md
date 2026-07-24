@@ -62,3 +62,8 @@
 
 <!-- Project-specific corrections from human feedback. -->
 <!-- Format: NEVER/ALWAYS [behavior] (learned [date]) -->
+- Treat docs/requirements/vit tools.dc.html as the approved first structural baseline, not as full release scope; only the shared platform and Photo Cure ship in this intent. (learned 2026-07-21) <!-- cid:intent-capture:c1 -->
+- Allow third-party CDN assets only on non-tool pages; keep every static tool page self-contained from third-party origins. (learned 2026-07-21) <!-- cid:intent-capture:c3 -->
+- Show planned tools as visible, non-indexed previews; reserve static pages and sitemap entries for implemented tools. (learned 2026-07-21) <!-- cid:scope-definition:c1 -->
+- Preserve full tested Photo Cure behavior while allowing its presentation to adapt to the shared product shell. (learned 2026-07-21) <!-- cid:scope-definition:c2 -->
+- Treat every approved initialization requirement as Must until the repository owner explicitly approves a scope change; never defer one silently. (learned 2026-07-21) <!-- cid:scope-definition:c3 -->

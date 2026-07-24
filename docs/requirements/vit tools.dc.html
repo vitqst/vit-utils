@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0}
+  a{color:var(--vt-cyan);text-decoration:none}
+  a:hover{color:var(--vt-accent)}
+  ::selection{background:var(--vt-accent);color:var(--vt-accent-ink)}
+  .vt-scroll::-webkit-scrollbar{width:10px;height:10px}
+  .vt-scroll::-webkit-scrollbar-thumb{background:var(--vt-border-2);border-radius:6px;border:2px solid transparent;background-clip:padding-box}
+  .vt-scroll::-webkit-scrollbar-track{background:transparent}
+  @keyframes vt-fade{from{opacity:0}to{opacity:1}}
+  @keyframes vt-pop{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:none}}
+  @keyframes vt-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  input,textarea,button{font-family:inherit}
+  input::placeholder,textarea::placeholder{color:var(--vt-text-3)}
+</style>
+</helmet>
+<div style="{{ rootStyle }}">
+
+  <!-- TOP BAR -->
+  <header style="display:flex;align-items:center;gap:16px;height:52px;flex:0 0 auto;padding:0 16px;border-bottom:1px solid var(--vt-border);background:var(--vt-bg-1)">
+    <div onClick="{{ goHome }}" style="display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none">
+      <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+        <path d="M20 8.5c0-2.5-2-4.5-4.6-4.5C12.6 4 11 6 11 8.2c0 .5.1 1 .2 1.4C8.7 10 6 12.4 6 16.2 6 21 10 25 16.5 25c5 0 8.5-2.6 8.5-6.4 0-2-1-3.4-2.6-4.3.9-.9 1.6-2.2 1.6-3.8 0-.7-.1-1.4-.4-2z" fill="var(--vt-accent)"></path>
+        <circle cx="18.4" cy="9.2" r="1.35" fill="var(--vt-accent-ink)"></circle>
+        <path d="M20.5 10.8c1.8-.4 3.4.2 3.4.2s-1 1.5-2.7 1.4" fill="var(--vt-accent)"></path>
+        <path d="M11 25l-1.5 3.2M15.5 25.4l-.4 3.4" stroke="var(--vt-accent)" stroke-width="1.6" stroke-linecap="round"></path>
+      </svg>
+      <span style="font:700 16px 'JetBrains Mono',monospace;letter-spacing:-.5px"><span style="color:var(--vt-accent)">vịt</span><span style="color:var(--vt-text-2)">·</span>tools</span>
+    </div>
+
+    <button onClick="{{ openPalette }}" style="flex:1;max-width:440px;display:flex;align-items:center;gap:9px;height:34px;padding:0 12px;background:var(--vt-bg-0);border:1px solid var(--vt-border);border-radius:8px;color:var(--vt-text-3);cursor:text;font-size:13px;text-align:left">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+      <span style="flex:1">{{ t.searchPh }}</span>
+      <kbd style="font:600 11px 'JetBrains Mono',monospace;background:var(--vt-bg-2);border:1px solid var(--vt-border);border-radius:5px;padding:2px 6px;color:var(--vt-text-2)">⌘K</kbd>
+    </button>
+
+    <div style="display:flex;align-items:center;gap:6px;margin-left:auto">
+      <button onClick="{{ toggleLang }}" title="Language" style="height:34px;padding:0 10px;background:var(--vt-bg-2);border:1px solid var(--vt-border);border-radius:8px;color:var(--vt-text);cursor:pointer;font:600 12px 'JetBrains Mono',monospace">{{ langLabel }}</button>
+      <button onClick="{{ toggleTheme }}" title="Theme" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--vt-bg-2);border:1px solid var(--vt-border);border-radius:8px;color:var(--vt-text);cursor:pointer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ themeIcon }}"></path></svg>
+      </button>
+      <a href="https://github.com" target="_blank" title="Source" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--vt-bg-2);border:1px solid var(--vt-border);border-radius:8px;color:var(--vt-text)">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.09.68-.22.68-.49v-1.7c-2.78.62-3.37-1.36-3.37-1.36-.45-1.18-1.11-1.49-1.11-1.49-.91-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.36-2.22-.26-4.55-1.14-4.55-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.7 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.4.2 2.44.1 2.7.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9v2.82c0 .27.18.59.69.49A10.02 10.02 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"></path></svg>
+      </a>
+    </div>
+  </header>
+
+  <div style="display:flex;flex:1;min-height:0">
+    <!-- SIDEBAR -->
+    <aside class="vt-scroll" style="width:262px;flex:0 0 auto;overflow-y:auto;border-right:1px solid var(--vt-border);background:var(--vt-bg-1);padding:12px 8px">
+      <sc-if value="{{ hasQuickList }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:4px 8px 6px">
+          <div style="font:600 10px 'JetBrains Mono',monospace;letter-spacing:1px;text-transform:uppercase;color:var(--vt-text-3);margin-bottom:6px">{{ t.recent }}</div>
+          <sc-for list="{{ recentTools }}" as="tool" hint-placeholder-count="2">
+            <div onClick="{{ tool.onSelect }}" style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--vt-text-2)" style-hover="background:var(--vt-bg-2);color:var(--vt-text)">
+              <span style="width:5px;height:5px;border-radius:50%;background:var(--vt-green);flex:0 0 auto"></span>
+              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ tool.name }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-for list="{{ sidebarGroups }}" as="group" hint-placeholder-count="7">
+        <div style="margin-bottom:2px">
+          <div onClick="{{ group.onToggle }}" style="display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:6px;cursor:pointer;user-select:none" style-hover="background:var(--vt-bg-2)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--vt-accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto"><path d="{{ group.iconPath }}"></path></svg>
+            <span style="flex:1;font:600 13px 'Be Vietnam Pro',sans-serif;color:var(--vt-text)">{{ group.name }}</span>
+            <span style="font:500 11px 'JetBrains Mono',monospace;color:var(--vt-text-3)">{{ group.count }}</span>
+            <span style="{{ group.caret }}">▸</span>
+          </div>
+          <sc-if value="{{ group.open }}" hint-placeholder-val="{{ true }}">
+            <div style="padding:2px 0 6px 8px;margin-left:15px;border-left:1px solid var(--vt-border)">
+              <sc-for list="{{ group.tools }}" as="tool" hint-placeholder-count="5">
+                <div onClick="{{ tool.onSelect }}" style="{{ tool.rowStyle }}" style-hover="background:var(--vt-bg-2)">
+                  <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ tool.name }}</span>
+                  <sc-if value="{{ tool.ready }}" hint-placeholder-val="{{ true }}"><span style="width:5px;height:5px;border-radius:50%;background:var(--vt-green);flex:0 0 auto" title="ready"></span></sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+
+      <div style="margin:14px 8px 4px;padding:10px 12px;border:1px solid var(--vt-border);border-radius:8px;background:var(--vt-bg-0)">
+        <div style="display:flex;align-items:center;gap:7px;font:600 11px 'JetBrains Mono',monospace;color:var(--vt-green)">
+          <span style="width:6px;height:6px;border-radius:50%;background:var(--vt-green);animation:vt-pulse 2.4s ease-in-out infinite"></span>{{ t.netLabel }}: 0
+        </div>
+        <div style="font-size:11px;color:var(--vt-text-3);margin-top:5px;line-height:1.5">{{ t.netHint }}</div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="vt-scroll" style="flex:1;min-width:0;overflow-y:auto;background:var(--vt-bg-0)">
+
+      <!-- HOME -->
+      <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+        <div style="max-width:1040px;margin:0 auto;padding:56px 40px 64px">
+          <div style="display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border:1px solid var(--vt-border);border-radius:999px;background:var(--vt-bg-1);font:600 11px 'JetBrains Mono',monospace;color:var(--vt-green);margin-bottom:22px">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--vt-green);animation:vt-pulse 2.4s ease-in-out infinite"></span>{{ t.heroBadge }}
+          </div>
+          <h1 style="font:700 44px/1.08 'Be Vietnam Pro',sans-serif;letter-spacing:-1.2px;margin:0 0 18px;max-width:15ch;text-wrap:balance">{{ t.heroTitle }}</h1>
+          <p style="font-size:17px;line-height:1.6;color:var(--vt-text-2);max-width:56ch;margin:0 0 30px;text-wrap:pretty">{{ t.heroSub }}</p>
+
+          <button onClick="{{ openPalette }}" style="display:flex;align-items:center;gap:11px;width:100%;max-width:540px;height:52px;padding:0 18px;background:var(--vt-bg-1);border:1px solid var(--vt-border-2);border-radius:12px;color:var(--vt-text-3);cursor:text;font-size:15px;text-align:left;margin-bottom:40px" style-hover="border-color:var(--vt-accent)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+            <span style="flex:1;color:var(--vt-text-2)">{{ t.heroSearch }}</span>
+            <kbd style="font:600 12px 'JetBrains Mono',monospace;background:var(--vt-bg-2);border:1px solid var(--vt-border);border-radius:6px;padding:3px 8px;color:var(--vt-text-2)">⌘K</kbd>
+          </button>
+
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:48px">
+            <sc-for list="{{ t.trust }}" as="tp" hint-placeholder-count="4">
+              <div style="padding:16px;border:1px solid var(--vt-border);border-radius:10px;background:var(--vt-bg-1)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--vt-accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px"><path d="{{ tp.icon }}"></path></svg>
+                <div style="font:600 14px 'Be Vietnam Pro',sans-serif;margin-bottom:4px">{{ tp.t }}</div>
+                <div style="font-size:12.5px;line-height:1.5;color:var(--vt-text-2)">{{ tp.d }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px">
+            <h2 style="font:600 20px 'Be Vietnam Pro',sans-serif;margin:0">{{ t.groupsTitle }}</h2>
+            <span style="font:500 12px 'JetBrains Mono',monospace;color:var(--vt-text-3)">{{ totalTools }} {{ t.toolsWord }}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
+            <sc-for list="{{ homeGroups }}" as="group" hint-placeholder-count="6">
+              <div onClick="{{ group.onOpen }}" style="padding:18px 20px;border:1px solid var(--vt-border);border-radius:12px;background:var(--vt-bg-1);cursor:pointer" style-hover="border-color:var(--vt-border-2);background:var(--vt-bg-2)">
+                <div style="display:flex;align-items:center;gap:11px;margin-bottom:10px">
+                  <div style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:var(--vt-bg-0);border:1px solid var(--vt-border)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--vt-accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ group.iconPath }}"></path></svg>
+                  </div>
+                  <div style="font:600 15px 'Be Vietnam Pro',sans-serif;flex:1">{{ group.name }}</div>
+                  <span style="font:500 11px 'JetBrains Mono',monospace;color:var(--vt-text-3)">{{ group.count }}</span>
+                </div>
+                <div style="font-size:12.5px;line-height:1.55;color:var(--vt-text-2)">{{ group.sample }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="margin-top:44px;padding:22px 24px;border:1px solid var(--vt-border);border-radius:12px;background:var(--vt-bg-1);display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--vt-green)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto"><path d="M9 12l2 2 4-4"></path><circle cx="12" cy="12" r="9"></circle></svg>
+            <div style="flex:1;min-width:240px">
+              <div style="font:600 15px 'Be Vietnam Pro',sans-serif;margin-bottom:3px">{{ t.osTitle }}</div>
+              <div style="font-size:13px;line-height:1.55;color:var(--vt-text-2)">{{ t.osSub }}</div>
+            </div>
+            <a href="https://github.com" target="_blank" style="padding:9px 16px;border:1px solid var(--vt-border-2);border-radius:8px;font:600 13px 'Be Vietnam Pro',sans-serif;color:var(--vt-text)">{{ t.osBtn }}</a>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- TOOL VIEW -->
+      <sc-if value="{{ isTool }}" hint-placeholder-val="{{ true }}">
+        <div style="max-width:940px;margin:0 auto;padding:26px 40px 60px">
+          <div style="display:flex;align-items:center;gap:8px;font:500 12px 'JetBrains Mono',monospace;color:var(--vt-text-3);margin-bottom:14px">
+            <span onClick="{{ goHome }}" style="cursor:pointer" style-hover="color:var(--vt-accent)">{{ t.home }}</span>
+            <span>/</span><span style="color:var(--vt-text-2)">{{ curTool.groupName }}</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:24px">
+            <div style="flex:1">
+              <h1 style="font:700 26px 'Be Vietnam Pro',sans-serif;letter-spacing:-.4px;margin:0 0 6px">{{ curTool.name }}</h1>
+              <p style="font-size:14px;color:var(--vt-text-2);margin:0;max-width:60ch;line-height:1.55">{{ curTool.desc }}</p>
+            </div>
+            <div style="display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;padding:6px 11px;border:1px solid var(--vt-border);border-radius:999px;background:var(--vt-bg-1);font:600 11px 'JetBrains Mono',monospace;color:var(--vt-green)">
+              <span style="width:6px;height:6px;border-radius:50%;background:var(--vt-green)"></span>{{ t.badge }}
+            </div>
+          </div>
+
+          <!-- JSON -->
+          <sc-if value="{{ isJson }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+              <button onClick="{{ jsonFormat }}" style="{{ btnPrimary }}">{{ t.jsonFormat }}</button>
+              <button onClick="{{ jsonMinify }}" style="{{ btnGhost }}">{{ t.jsonMinify }}</button>
+              <button onClick="{{ jsonClear }}" style="{{ btnGhost }}">{{ t.clear }}</button>
+              <sc-if value="{{ jsonStatus }}" hint-placeholder-val="{{ true }}"><span style="{{ jsonStatusStyle }}">{{ jsonStatus }}</span></sc-if>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div>
+                <div style="{{ lblStyle }}">{{ t.input }}</div>
+                <textarea value="{{ jsonIn }}" onChange="{{ onJsonIn }}" placeholder='{"hello":"vịt"}' style="{{ taStyle }}"></textarea>
+              </div>
+              <div>
+                <div style="{{ lblStyle }}">{{ t.output }}</div>
+                <textarea value="{{ jsonOut }}" readOnly="{{ true }}" placeholder="—" style="{{ taStyle }}"></textarea>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- BASE64 -->
+          <sc-if value="{{ isB64 }}" hint-placeholder-val="{{ true }}">
+            <div style="display:inline-flex;gap:0;margin-bottom:14px;border:1px solid var(--vt-border);border-radius:8px;overflow:hidden">
+              <button onClick="{{ b64enc }}" style="{{ b64encStyle }}">{{ t.encode }}</button>
+              <button onClick="{{ b64dec }}" style="{{ b64decStyle }}">{{ t.decode }}</button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div>
+                <div style="{{ lblStyle }}">{{ t.input }}</div>
+                <textarea value="{{ b64in }}" onChange="{{ onB64In }}" style="{{ taStyle }}"></textarea>
+              </div>
+              <div>
+                <div style="{{ lblStyle }}">{{ t.output }}</div>
+                <textarea value="{{ b64out }}" readOnly="{{ true }}" style="{{ taStyle }}"></textarea>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- CASE -->
+          <sc-if value="{{ isCase }}" hint-placeholder-val="{{ true }}">
+            <div style="{{ lblStyle }}">{{ t.input }}</div>
+            <textarea value="{{ caseIn }}" onChange="{{ onCaseIn }}" placeholder="{{ t.casePh }}" style="{{ taStyleSm }}"></textarea>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
+              <sc-for list="{{ caseRows }}" as="row" hint-placeholder-count="8">
+                <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--vt-border);border-radius:9px;background:var(--vt-bg-1)">
+                  <div style="width:96px;flex:0 0 auto;font:600 10px 'JetBrains Mono',monospace;letter-spacing:.5px;text-transform:uppercase;color:var(--vt-text-3)">{{ row.label }}</div>
+                  <div style="flex:1;font:500 13px 'JetBrains Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ row.value }}</div>
+                  <button onClick="{{ row.onCopy }}" style="{{ copyBtn }}">{{ t.copy }}</button>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <!-- SLUGIFY / BỎ DẤU -->
+          <sc-if value="{{ isSlug }}" hint-placeholder-val="{{ true }}">
+            <div style="{{ lblStyle }}">{{ t.input }}</div>
+            <textarea value="{{ slugIn }}" onChange="{{ onSlugIn }}" placeholder="Tiếng Việt có dấu — đủ đầy" style="{{ taStyleSm }}"></textarea>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+              <sc-for list="{{ slugRows }}" as="row" hint-placeholder-count="3">
+                <div style="padding:12px 14px;border:1px solid var(--vt-border);border-radius:9px;background:var(--vt-bg-1)">
+                  <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+                    <div style="flex:1;font:600 10px 'JetBrains Mono',monospace;letter-spacing:.5px;text-transform:uppercase;color:var(--vt-text-3)">{{ row.label }}</div>
+                    <button onClick="{{ row.onCopy }}" style="{{ copyBtn }}">{{ t.copy }}</button>
+                  </div>
+                  <div style="font:500 14px 'JetBrains Mono',monospace;color:var(--vt-accent);word-break:break-all">{{ row.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <!-- UUID -->
+          <sc-if value="{{ isUuid }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+              <sc-for list="{{ uuidTypes }}" as="ut" hint-placeholder-count="3">
+                <button onClick="{{ ut.onPick }}" style="{{ ut.style }}">{{ ut.label }}</button>
+              </sc-for>
+              <button onClick="{{ uuidGen }}" style="{{ btnPrimary }};margin-left:6px">{{ t.generate }}</button>
+              <button onClick="{{ uuidCopyAll }}" style="{{ btnGhost }}">{{ t.copyAll }}</button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{ uuidRows }}" as="row" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid var(--vt-border);border-radius:8px;background:var(--vt-bg-1)">
+                  <span style="font:500 11px 'JetBrains Mono',monospace;color:var(--vt-text-3);width:22px">{{ row.n }}</span>
+                  <span style="flex:1;font:500 13px 'JetBrains Mono',monospace;color:var(--vt-accent);word-break:break-all">{{ row.value }}</span>
+                  <button onClick="{{ row.onCopy }}" style="{{ copyBtn }}">{{ t.copy }}</button>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <!-- TIMESTAMP -->
+          <sc-if value="{{ isTs }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:16px;flex-wrap:wrap">
+              <div style="flex:1;min-width:220px">
+                <div style="{{ lblStyle }}">{{ t.tsLabel }}</div>
+                <input value="{{ tsIn }}" onChange="{{ onTsIn }}" style="{{ inStyle }}">
+              </div>
+              <button onClick="{{ tsNow }}" style="{{ btnPrimary }}">{{ t.now }}</button>
+            </div>
+            <sc-if value="{{ tsValid }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <sc-for list="{{ tsRows }}" as="row" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid var(--vt-border);border-radius:8px;background:var(--vt-bg-1)">
+                    <div style="width:120px;flex:0 0 auto;font:600 10px 'JetBrains Mono',monospace;letter-spacing:.5px;text-transform:uppercase;color:var(--vt-text-3)">{{ row.label }}</div>
+                    <div style="flex:1;font:500 13px 'JetBrains Mono',monospace">{{ row.value }}</div>
+                    <button onClick="{{ row.onCopy }}" style="{{ copyBtn }}">{{ t.copy }}</button>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ tsInvalid }}" hint-placeholder-val="{{ true }}"><div style="padding:12px 14px;border:1px solid var(--vt-red);border-radius:8px;color:var(--vt-red);font-size:13px">{{ t.tsErr }}</div></sc-if>
+          </sc-if>
+
+          <!-- HASH -->
+          <sc-if value="{{ isHash }}" hint-placeholder-val="{{ true }}">
+            <div style="{{ lblStyle }}">{{ t.input }}</div>
+            <textarea value="{{ hashIn }}" onChange="{{ onHashIn }}" placeholder="{{ t.hashPh }}" style="{{ taStyleSm }}"></textarea>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+              <sc-for list="{{ hashRows }}" as="row" hint-placeholder-count="3">
+                <div style="padding:12px 14px;border:1px solid var(--vt-border);border-radius:9px;background:var(--vt-bg-1)">
+                  <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+                    <div style="flex:1;font:600 10px 'JetBrains Mono',monospace;letter-spacing:.5px;text-transform:uppercase;color:var(--vt-text-3)">{{ row.label }}</div>
+                    <button onClick="{{ row.onCopy }}" style="{{ copyBtn }}">{{ t.copy }}</button>
+                  </div>
+                  <div style="font:500 12.5px 'JetBrains Mono',monospace;color:var(--vt-cyan);word-break:break-all;line-height:1.5">{{ row.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <!-- LUNAR -->
+          <sc-if value="{{ isLunar }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:18px;flex-wrap:wrap">
+              <div>
+                <div style="{{ lblStyle }}">{{ t.solarDate }}</div>
+                <input type="date" value="{{ lunarDate }}" onChange="{{ onLunarDate }}" style="{{ inStyle }};min-width:190px">
+              </div>
+              <button onClick="{{ lunarToday }}" style="{{ btnPrimary }}">{{ t.today }}</button>
+            </div>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:stretch">
+              <div style="flex:1;min-width:240px;padding:24px;border:1px solid var(--vt-accent);border-radius:14px;background:var(--vt-bg-1);text-align:center">
+                <div style="font:600 11px 'JetBrains Mono',monospace;letter-spacing:1px;text-transform:uppercase;color:var(--vt-text-3);margin-bottom:12px">{{ t.lunarDateLabel }}</div>
+                <div style="font:700 52px 'Be Vietnam Pro',sans-serif;color:var(--vt-accent);line-height:1">{{ lunarBig }}</div>
+                <div style="font-size:15px;color:var(--vt-text-2);margin-top:10px">{{ lunarSub }}</div>
+              </div>
+              <div style="flex:1;min-width:240px;display:flex;flex-direction:column;gap:8px">
+                <sc-for list="{{ lunarRows }}" as="row" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid var(--vt-border);border-radius:8px;background:var(--vt-bg-1)">
+                    <div style="flex:1;font:600 11px 'JetBrains Mono',monospace;letter-spacing:.3px;color:var(--vt-text-3)">{{ row.label }}</div>
+                    <div style="font:600 14px 'Be Vietnam Pro',sans-serif;color:var(--vt-text)">{{ row.value }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- COMING SOON -->
+          <sc-if value="{{ isSoon }}" hint-placeholder-val="{{ true }}">
+            <div style="padding:48px;border:1px dashed var(--vt-border-2);border-radius:14px;text-align:center;background:var(--vt-bg-1)">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--vt-accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:14px"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+              <div style="font:600 17px 'Be Vietnam Pro',sans-serif;margin-bottom:6px">{{ t.soonTitle }}</div>
+              <div style="font-size:13.5px;color:var(--vt-text-2);max-width:44ch;margin:0 auto;line-height:1.55">{{ t.soonSub }}</div>
+            </div>
+          </sc-if>
+
+        </div>
+      </sc-if>
+    </main>
+  </div>
+
+  <!-- COMMAND PALETTE -->
+  <sc-if value="{{ paletteOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closePalette }}" style="position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding-top:12vh;animation:vt-fade .12s ease">
+      <div onClick="{{ stop }}" style="width:100%;max-width:600px;background:var(--vt-bg-1);border:1px solid var(--vt-border-2);border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.5);overflow:hidden;animation:vt-pop .16s ease">
+        <div style="display:flex;align-items:center;gap:11px;padding:16px 18px;border-bottom:1px solid var(--vt-border)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--vt-text-3)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+          <input ref="{{ setPin }}" value="{{ query }}" onChange="{{ onQuery }}" onKeyDown="{{ onPaletteKey }}" placeholder="{{ t.palettePh }}" style="flex:1;background:none;border:none;outline:none;color:var(--vt-text);font-size:16px">
+          <kbd style="font:600 11px 'JetBrains Mono',monospace;background:var(--vt-bg-2);border:1px solid var(--vt-border);border-radius:5px;padding:2px 7px;color:var(--vt-text-3)">ESC</kbd>
+        </div>
+        <div class="vt-scroll" style="max-height:52vh;overflow-y:auto;padding:8px">
+          <sc-for list="{{ paletteResults }}" as="row" hint-placeholder-count="6">
+            <div onClick="{{ row.onSelect }}" onMouseEnter="{{ row.onHover }}" style="{{ row.style }}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--vt-accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto"><path d="{{ row.iconPath }}"></path></svg>
+              <span style="flex:1;font-size:14px;color:var(--vt-text)">{{ row.name }}</span>
+              <span style="font:500 11px 'JetBrains Mono',monospace;color:var(--vt-text-3)">{{ row.groupName }}</span>
+              <sc-if value="{{ row.ready }}" hint-placeholder-val="{{ true }}"><span style="width:5px;height:5px;border-radius:50%;background:var(--vt-green);flex:0 0 auto"></span></sc-if>
+            </div>
+          </sc-for>
+          <sc-if value="{{ paletteEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:36px;text-align:center;color:var(--vt-text-3);font-size:14px">{{ t.noResults }}</div>
+          </sc-if>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;padding:10px 16px;border-top:1px solid var(--vt-border);font:500 11px 'JetBrains Mono',monospace;color:var(--vt-text-3)">
+          <span>↑↓ {{ t.navigate }}</span><span>↵ {{ t.open }}</span><span style="margin-left:auto;display:flex;align-items:center;gap:5px"><span style="width:5px;height:5px;border-radius:50%;background:var(--vt-green)"></span>{{ t.ready }}</span>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:840}}">
+class Component extends DCLogic {
+  state = {
+    lang: 'vi', theme: 'dark', paletteOpen: false, query: '', active: 0,
+    activeTool: null, recent: [],
+    expanded: { text: true, dev: true, datetime: true, generators: false, files: false, security: false, media: false },
+    jsonIn: '', jsonOut: '', jsonStatus: '', jsonOk: true,
+    b64in: '', b64mode: 'encode',
+    caseIn: '',
+    slugIn: '',
+    uuidType: 'uuid', uuidOut: [],
+    tsIn: '',
+    hashIn: '', hashOut: {},
+    lunarDate: ''
+  };
+
+  GROUPS = [
+    { id: 'text', vi: 'Văn bản & chuỗi', en: 'Text & string', icon: 'M4 6h16M4 12h10M4 18h16' },
+    { id: 'dev', vi: 'Lập trình & dữ liệu', en: 'Developer & data', icon: 'M9 6l-5 6 5 6M15 6l5 6-5 6' },
+    { id: 'datetime', vi: 'Ngày & giờ', en: 'Date & time', icon: 'M12 7v5l3 2M12 3a9 9 0 100 18 9 9 0 000-18z' },
+    { id: 'generators', vi: 'Trình tạo', en: 'Generators', icon: 'M12 3l2.3 6.2L21 11l-6.7 1.8L12 21l-2.3-8.2L3 11l6.7-1.8z' },
+    { id: 'files', vi: 'Tệp & tài liệu', en: 'Files & documents', icon: 'M14 3H7v18h11V8zM14 3v5h5' },
+    { id: 'security', vi: 'Bảo mật', en: 'Security', icon: 'M12 3l7 3v6c0 4-3 7.2-7 9-4-1.8-7-5-7-9V6z' },
+    { id: 'media', vi: 'Phương tiện', en: 'Media', icon: 'M4 5h16v14H4zM4 16l4.5-4.5 3 3L16 10l4 4' }
+  ];
+
+  TOOLS = [
+    { id: 'case', g: 'text', vi: 'Đổi kiểu chữ', en: 'Case convert', kw: 'upper lower title camel snake kebab', ready: 1 },
+    { id: 'slugify', g: 'text', vi: 'Slug & bỏ dấu', en: 'Slugify & remove diacritics', kw: 'slug bo dau tieng viet telex url', ready: 1 },
+    { id: 'diff', g: 'text', vi: 'So sánh (diff)', en: 'Text diff', kw: 'compare' },
+    { id: 'wordcount', g: 'text', vi: 'Đếm từ & ký tự', en: 'Word count', kw: 'characters lines' },
+    { id: 'sortlines', g: 'text', vi: 'Sắp xếp & lọc dòng', en: 'Sort & dedupe lines', kw: 'unique' },
+    { id: 'regex', g: 'text', vi: 'Kiểm thử Regex', en: 'Regex tester', kw: 'pattern match' },
+    { id: 'lorem', g: 'text', vi: 'Lorem Ipsum', en: 'Lorem ipsum', kw: 'placeholder text' },
+    { id: 'unicode', g: 'text', vi: 'Soi Unicode', en: 'Unicode inspector', kw: 'codepoint' },
+    { id: 'json', g: 'dev', vi: 'JSON Formatter', en: 'JSON format/validate', kw: 'minify beautify validate', ready: 1 },
+    { id: 'base64', g: 'dev', vi: 'Base64', en: 'Base64 encode/decode', kw: 'encode decode', ready: 1 },
+    { id: 'convert', g: 'dev', vi: 'JSON ↔ YAML ↔ CSV', en: 'JSON ↔ YAML ↔ CSV', kw: 'xml toml' },
+    { id: 'jwt', g: 'dev', vi: 'Giải mã JWT', en: 'JWT decoder', kw: 'token' },
+    { id: 'sqlfmt', g: 'dev', vi: 'Định dạng SQL', en: 'SQL formatter', kw: 'query' },
+    { id: 'cron', g: 'dev', vi: 'Cron builder', en: 'Cron builder', kw: 'schedule next run' },
+    { id: 'curl', g: 'dev', vi: 'curl → code', en: 'curl → code', kw: 'fetch' },
+    { id: 'json2ts', g: 'dev', vi: 'JSON → TypeScript', en: 'JSON → TS types', kw: 'interface' },
+    { id: 'timestamp', g: 'datetime', vi: 'Unix Timestamp', en: 'Unix timestamp', kw: 'epoch date convert', ready: 1 },
+    { id: 'lunar', g: 'datetime', vi: 'Đổi lịch âm', en: 'Lunar (âm lịch) converter', kw: 'am lich lunar vietnam can chi', ready: 1 },
+    { id: 'timezone', g: 'datetime', vi: 'Đổi múi giờ', en: 'Timezone converter', kw: 'utc' },
+    { id: 'datediff', g: 'datetime', vi: 'Khoảng cách ngày', en: 'Date diff', kw: 'between' },
+    { id: 'duration', g: 'datetime', vi: 'Diễn giải thời lượng', en: 'Duration humanizer', kw: 'seconds' },
+    { id: 'workdays', g: 'datetime', vi: 'Tính ngày làm việc', en: 'Working-days calc', kw: 'business' },
+    { id: 'uuid', g: 'generators', vi: 'UUID / ULID / NanoID', en: 'UUID / ULID / NanoID', kw: 'guid id random', ready: 1 },
+    { id: 'password', g: 'generators', vi: 'Tạo mật khẩu', en: 'Password generator', kw: 'random' },
+    { id: 'qr', g: 'generators', vi: 'Mã QR', en: 'QR code', kw: 'barcode' },
+    { id: 'mock', g: 'generators', vi: 'Dữ liệu giả', en: 'Mock data', kw: 'fake' },
+    { id: 'metatags', g: 'generators', vi: 'Meta tags + OG', en: 'Meta tags + OG preview', kw: 'seo' },
+    { id: 'favicon', g: 'generators', vi: 'Bộ favicon', en: 'Favicon set', kw: 'icon' },
+    { id: 'gitignore', g: 'generators', vi: '.gitignore', en: '.gitignore', kw: 'git' },
+    { id: 'pdfmerge', g: 'files', vi: 'Gộp / tách PDF', en: 'PDF merge/split', kw: 'rotate compress' },
+    { id: 'pdfimg', g: 'files', vi: 'PDF ↔ ảnh', en: 'PDF ↔ image', kw: 'convert' },
+    { id: 'csvxlsx', g: 'files', vi: 'CSV ↔ XLSX', en: 'CSV ↔ XLSX', kw: 'excel sheet' },
+    { id: 'zip', g: 'files', vi: 'Nén / giải nén ZIP', en: 'Zip / unzip', kw: 'archive' },
+    { id: 'filetype', g: 'files', vi: 'Nhận diện loại tệp', en: 'Magic-byte detector', kw: 'mime' },
+    { id: 'hash', g: 'security', vi: 'Băm SHA / MD5', en: 'Hash (SHA)', kw: 'sha256 sha512 checksum', ready: 1 },
+    { id: 'pwstrength', g: 'security', vi: 'Độ mạnh mật khẩu', en: 'Password strength', kw: 'entropy' },
+    { id: 'hibp', g: 'security', vi: 'Kiểm tra rò rỉ (HIBP)', en: 'HIBP breach check', kw: 'pwned k-anonymity' },
+    { id: 'x509', g: 'security', vi: 'Giải mã chứng chỉ X.509', en: 'X.509 cert decoder', kw: 'certificate' },
+    { id: 'totp', g: 'security', vi: 'TOTP / HMAC', en: 'TOTP / HMAC', kw: '2fa' },
+    { id: 'photocure', g: 'media', vi: 'Xử lý ảnh', en: 'Photo cure', kw: 'image edit' },
+    { id: 'collage', g: 'media', vi: 'Ghép ảnh (collage)', en: 'Photo collage', kw: 'grid' }
+  ];
+
+  I18N = {
+    vi: {
+      searchPh: 'Tìm công cụ…', palettePh: 'Gõ tên công cụ, ví dụ "json", "âm lịch"…',
+      recent: 'Gần đây', netLabel: 'Yêu cầu mạng', netHint: 'Mở DevTools › Network để tự kiểm chứng.',
+      heroBadge: 'Không upload · Không theo dõi · Không quảng cáo',
+      heroTitle: 'Công cụ nhỏ, chạy hoàn toàn trong trình duyệt.',
+      heroSub: 'Một bộ tiện ích đơn nhiệm, mở ra là dùng. Dữ liệu của bạn không bao giờ rời khỏi máy — mọi thứ xử lý ngay trên trình duyệt, kể cả khi mất mạng.',
+      heroSearch: 'Mở bảng lệnh để tìm công cụ…',
+      groupsTitle: 'Nhóm công cụ', toolsWord: 'công cụ',
+      osTitle: 'Mã nguồn mở — chạy được ở máy bạn', osSub: 'Triển khai bằng Firebase Hosting, không backend. Xem mã, tự host, hoặc chạy offline tùy thích.', osBtn: 'Xem mã nguồn',
+      home: 'Trang chủ', badge: 'Không rời trình duyệt',
+      input: 'Đầu vào', output: 'Kết quả', copy: 'Copy', copyAll: 'Copy tất cả', clear: 'Xóa', generate: 'Tạo',
+      jsonFormat: 'Định dạng', jsonMinify: 'Rút gọn',
+      encode: 'Mã hóa', decode: 'Giải mã',
+      casePh: 'Nhập văn bản để đổi kiểu chữ…',
+      tsLabel: 'Unix timestamp (giây)', now: 'Bây giờ', tsErr: 'Timestamp không hợp lệ.',
+      hashPh: 'Nhập văn bản để băm…',
+      solarDate: 'Ngày dương lịch', today: 'Hôm nay', lunarDateLabel: 'Ngày âm lịch', lunarMonth: 'Tháng', lunarYear: 'Năm', lunarLeap: 'Tháng nhuận', canChi: 'Can Chi', yes: 'Có', no: 'Không',
+      soonTitle: 'Công cụ đang được hoàn thiện', soonSub: 'Bản thiết kế này minh họa 8 công cụ đã chạy thật. Mỗi công cụ mới chỉ cần thêm một tệp module vào registry — sidebar, tìm kiếm và sitemap tự cập nhật.',
+      palettePh2: '', noResults: 'Không tìm thấy công cụ nào.', navigate: 'di chuyển', open: 'mở', ready: 'đã chạy được',
+      trust: [
+        { t: 'Không upload', d: 'Tệp và văn bản được xử lý ngay trong trình duyệt, không gửi đi đâu cả.', icon: 'M12 19V6M5 12l7-7 7 7' },
+        { t: 'Không theo dõi', d: 'Không cookie phân tích, không fingerprint, không log phía server.', icon: 'M17.94 17.94A10 10 0 016 6m2 2a10 10 0 0114 8M1 1l22 22' },
+        { t: 'Không quảng cáo', d: 'Giao diện gọn, tập trung vào việc — không banner, không popup.', icon: 'M18 6L6 18M6 6l12 12' },
+        { t: 'Kiểm chứng được', d: 'Mỗi trang công cụ: 0 request ra ngoài. Mở DevTools là thấy ngay.', icon: 'M9 12l2 2 4-4M12 3a9 9 0 100 18 9 9 0 000-18z' }
+      ]
+    },
+    en: {
+      searchPh: 'Search tools…', palettePh: 'Type a tool, e.g. "json", "lunar"…',
+      recent: 'Recent', netLabel: 'Network requests', netHint: 'Open DevTools › Network to verify it yourself.',
+      heroBadge: 'No uploads · No tracking · No ads',
+      heroTitle: 'Small tools that run entirely in your browser.',
+      heroSub: 'A collection of single-purpose utilities — open the page and use it. Your data never leaves your machine; everything runs client-side, even offline.',
+      heroSearch: 'Open the command palette to find a tool…',
+      groupsTitle: 'Tool groups', toolsWord: 'tools',
+      osTitle: 'Open source — run it locally', osSub: 'Deployed on Firebase Hosting, no backend. Read the code, self-host, or run offline.', osBtn: 'View source',
+      home: 'Home', badge: 'Stays in your browser',
+      input: 'Input', output: 'Output', copy: 'Copy', copyAll: 'Copy all', clear: 'Clear', generate: 'Generate',
+      jsonFormat: 'Format', jsonMinify: 'Minify',
+      encode: 'Encode', decode: 'Decode',
+      casePh: 'Type text to convert case…',
+      tsLabel: 'Unix timestamp (seconds)', now: 'Now', tsErr: 'Invalid timestamp.',
+      hashPh: 'Type text to hash…',
+      solarDate: 'Solar date', today: 'Today', lunarDateLabel: 'Lunar date', lunarMonth: 'Month', lunarYear: 'Year', lunarLeap: 'Leap month', canChi: 'Can Chi', yes: 'Yes', no: 'No',
+      soonTitle: 'Tool in progress', soonSub: 'This design ships 8 fully working tools. Each new tool is just one module file added to the registry — sidebar, search and sitemap update automatically.',
+      noResults: 'No tools found.', navigate: 'navigate', open: 'open', ready: 'working',
+      trust: [
+        { t: 'No uploads', d: 'Files and text are processed in the browser and never sent anywhere.', icon: 'M12 19V6M5 12l7-7 7 7' },
+        { t: 'No tracking', d: 'No analytics cookies, no fingerprinting, no server-side logs.', icon: 'M17.94 17.94A10 10 0 016 6m2 2a10 10 0 0114 8M1 1l22 22' },
+        { t: 'No ads', d: 'A focused, quiet interface — no banners, no popups.', icon: 'M18 6L6 18M6 6l12 12' },
+        { t: 'Verifiable', d: 'Each tool page makes 0 outbound requests. Open DevTools and see.', icon: 'M9 12l2 2 4-4M12 3a9 9 0 100 18 9 9 0 000-18z' }
+      ]
+    }
+  };
+
+  componentDidMount() {
+    this._key = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); this.setState(s => ({ paletteOpen: !s.paletteOpen, query: '', active: 0 })); }
+      else if (e.key === 'Escape' && this.state.paletteOpen) { this.setState({ paletteOpen: false }); }
+    };
+    window.addEventListener('keydown', this._key);
+    try { const r = JSON.parse(localStorage.getItem('vt_recent') || '[]'); if (Array.isArray(r)) this.setState({ recent: r }); } catch (e) {}
+    const iso = new Date().toISOString().slice(0, 10);
+    this.setState({ lunarDate: iso, tsIn: String(Math.floor(Date.now() / 1000)) });
+  }
+  componentDidUpdate() { if (this.state.paletteOpen && !this._wasOpen && this._pin) this._pin.focus(); this._wasOpen = this.state.paletteOpen; }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); }
+
+  copy(v) { try { navigator.clipboard.writeText(v); } catch (e) {} }
+  toolName(t) { return this.state.lang === 'vi' ? t.vi : t.en; }
+  groupName(id) { const g = this.GROUPS.find(x => x.id === id); return g ? (this.state.lang === 'vi' ? g.vi : g.en) : ''; }
+  groupIcon(id) { const g = this.GROUPS.find(x => x.id === id); return g ? g.icon : ''; }
+
+  select(id) {
+    const rec = [id, ...this.state.recent.filter(x => x !== id)].slice(0, 4);
+    try { localStorage.setItem('vt_recent', JSON.stringify(rec)); } catch (e) {}
+    this.setState({ activeTool: id, paletteOpen: false, recent: rec });
+  }
+
+  // ---- tool logic ----
+  jsonFmt(sp) { try { const o = JSON.parse(this.state.jsonIn); const out = JSON.stringify(o, null, sp); this.setState({ jsonOut: out, jsonOk: true, jsonStatus: (this.state.lang === 'vi' ? 'Hợp lệ' : 'Valid') + ' · ' + out.length + ' B' }); } catch (e) { this.setState({ jsonOut: '', jsonOk: false, jsonStatus: (this.state.lang === 'vi' ? 'Lỗi: ' : 'Error: ') + e.message }); } }
+
+  b64compute(v, mode) {
+    if (!v) return '';
+    try {
+      if (mode === 'encode') return btoa(String.fromCharCode.apply(null, new TextEncoder().encode(v)));
+      const bin = atob(v.trim()); const bytes = Uint8Array.from(bin, c => c.charCodeAt(0)); return new TextDecoder().decode(bytes);
+    } catch (e) { return (this.state.lang === 'vi' ? '⚠ Không hợp lệ' : '⚠ Invalid input'); }
+  }
+
+  caseResults(s) {
+    const words = (s || '').replace(/[_\-]+/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').trim().split(/\s+/).filter(Boolean);
+    const cap = w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+    return {
+      UPPER: (s || '').toUpperCase(), lower: (s || '').toLowerCase(),
+      Title: words.map(cap).join(' '),
+      Sentence: (s || '').toLowerCase().replace(/(^\s*\w|[.!?]\s+\w)/g, m => m.toUpperCase()),
+      camelCase: words.map((w, i) => i ? cap(w) : w.toLowerCase()).join(''),
+      PascalCase: words.map(cap).join(''),
+      snake_case: words.map(w => w.toLowerCase()).join('_'),
+      'kebab-case': words.map(w => w.toLowerCase()).join('-'),
+      CONSTANT: words.map(w => w.toUpperCase()).join('_'),
+      'dot.case': words.map(w => w.toLowerCase()).join('.')
+    };
+  }
+
+  stripDiacritics(s) { return (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D'); }
+  slugify(s) { return this.stripDiacritics(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
+
+  genOne(type) {
+    if (type === 'uuid') return (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); }));
+    if (type === 'ulid') { const A = '0123456789ABCDEFGHJKMNPQRSTVWXYZ'; let t = Date.now(), ts = ''; for (let i = 0; i < 10; i++) { ts = A[t % 32] + ts; t = Math.floor(t / 32); } let r = ''; for (let i = 0; i < 16; i++) r += A[Math.random() * 32 | 0]; return ts + r; }
+    const A = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_-'; let r = ''; for (let i = 0; i < 21; i++) r += A[Math.random() * 64 | 0]; return r;
+  }
+  uuidGen() { const out = []; for (let i = 0; i < 6; i++) out.push(this.genOne(this.state.uuidType)); this.setState({ uuidOut: out }); }
+
+  async computeHash(v) {
+    if (!v) { this.setState({ hashOut: {} }); return; }
+    const data = new TextEncoder().encode(v); const out = {};
+    for (const [name, algo] of [['SHA-1', 'SHA-1'], ['SHA-256', 'SHA-256'], ['SHA-512', 'SHA-512']]) {
+      try { const buf = await crypto.subtle.digest(algo, data); out[name] = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join(''); } catch (e) { out[name] = 'error'; }
+    }
+    this.setState({ hashOut: out });
+  }
+
+  // ---- lunar (Ho Ngoc Duc algorithm) ----
+  jdn(dd, mm, yy) { const a = Math.floor((14 - mm) / 12); const y = yy + 4800 - a; const m = mm + 12 * a - 3; let jd = dd + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045; if (jd < 2299161) jd = dd + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - 32083; return jd; }
+  newMoon(k) { const T = k / 1236.85, T2 = T * T, T3 = T2 * T, dr = Math.PI / 180; let J1 = 2415020.75933 + 29.53058868 * k + 0.0001178 * T2 - 0.000000155 * T3; J1 += 0.00033 * Math.sin((166.56 + 132.87 * T - 0.009173 * T2) * dr); const M = 359.2242 + 29.10535608 * k - 0.0000333 * T2 - 0.00000347 * T3; const Mp = 306.0253 + 385.81691806 * k + 0.0107306 * T2 + 0.00001236 * T3; const F = 21.2964 + 390.67050646 * k - 0.0016528 * T2 - 0.00000239 * T3; let C = (0.1734 - 0.000393 * T) * Math.sin(M * dr) + 0.0021 * Math.sin(2 * dr * M); C += -0.4068 * Math.sin(Mp * dr) + 0.0161 * Math.sin(2 * dr * Mp) - 0.0004 * Math.sin(3 * dr * Mp); C += 0.0104 * Math.sin(2 * dr * F) - 0.0051 * Math.sin(dr * (M + Mp)) - 0.0074 * Math.sin(dr * (M - Mp)); C += 0.0004 * Math.sin(dr * (2 * F + M)) - 0.0004 * Math.sin(dr * (2 * F - M)) - 0.0006 * Math.sin(dr * (2 * F + Mp)); C += 0.0010 * Math.sin(dr * (2 * F - Mp)) + 0.0005 * Math.sin(dr * (2 * Mp + M)); let dt; if (T < -11) dt = 0.001 + 0.000839 * T + 0.0002261 * T2 - 0.00000845 * T3 - 0.000000081 * T * T3; else dt = -0.000278 + 0.000265 * T + 0.000262 * T2; return J1 + C - dt; }
+  sunLong(jd) { const T = (jd - 2451545.0) / 36525, T2 = T * T, dr = Math.PI / 180; const M = 357.52910 + 35999.05030 * T - 0.0001559 * T2 - 0.00000048 * T * T2; const L0 = 280.46645 + 36000.76983 * T + 0.0003032 * T2; let DL = (1.914600 - 0.004817 * T - 0.000014 * T2) * Math.sin(dr * M); DL += (0.019993 - 0.000101 * T) * Math.sin(dr * 2 * M) + 0.000290 * Math.sin(dr * 3 * M); let L = (L0 + DL) * dr; return L - Math.PI * 2 * Math.floor(L / (Math.PI * 2)); }
+  getSunLong(dn, tz) { return Math.floor(this.sunLong(dn - 0.5 - tz / 24) / Math.PI * 6); }
+  getNewMoonDay(k, tz) { return Math.floor(this.newMoon(k) + 0.5 + tz / 24); }
+  getMonth11(yy, tz) { const off = this.jdn(31, 12, yy) - 2415021; const k = Math.floor(off / 29.530588853); let nm = this.getNewMoonDay(k, tz); if (this.getSunLong(nm, tz) >= 9) nm = this.getNewMoonDay(k - 1, tz); return nm; }
+  getLeapOffset(a11, tz) { const k = Math.floor((a11 - 2415021.076998695) / 29.530588853 + 0.5); let last = 0, i = 1, arc = this.getSunLong(this.getNewMoonDay(k + i, tz), tz); do { last = arc; i++; arc = this.getSunLong(this.getNewMoonDay(k + i, tz), tz); } while (arc !== last && i < 14); return i - 1; }
+  solar2lunar(dd, mm, yy) { const tz = 7; const dn = this.jdn(dd, mm, yy); const k = Math.floor((dn - 2415021.076998695) / 29.530588853); let ms = this.getNewMoonDay(k + 1, tz); if (ms > dn) ms = this.getNewMoonDay(k, tz); let a11 = this.getMonth11(yy, tz), b11 = a11, ly; if (a11 >= ms) { ly = yy; a11 = this.getMonth11(yy - 1, tz); } else { ly = yy + 1; b11 = this.getMonth11(yy + 1, tz); } const ld = dn - ms + 1; const diff = Math.floor((ms - a11) / 29); let leap = 0, lm = diff + 11; if (b11 - a11 > 365) { const lo = this.getLeapOffset(a11, tz); if (diff >= lo) { lm = diff + 10; if (diff === lo) leap = 1; } } if (lm > 12) lm -= 12; if (lm >= 11 && diff < 4) ly -= 1; return { day: ld, month: lm, year: ly, leap: leap }; }
+  canChi(y) { const can = ['Canh', 'Tân', 'Nhâm', 'Quý', 'Giáp', 'Ất', 'Bính', 'Đinh', 'Mậu', 'Kỷ']; const chi = ['Thân', 'Dậu', 'Tuất', 'Hợi', 'Tý', 'Sửu', 'Dần', 'Mão', 'Thìn', 'Tỵ', 'Ngọ', 'Mùi']; return can[y % 10] + ' ' + chi[y % 12]; }
+
+  colors() {
+    if (this.state.theme === 'light') return {
+      '--vt-bg-0': '#f5f7fa', '--vt-bg-1': '#ffffff', '--vt-bg-2': '#eef1f6', '--vt-bg-3': '#e3e8ef',
+      '--vt-border': '#dde3ec', '--vt-border-2': '#c3ccda',
+      '--vt-text': '#1a2330', '--vt-text-2': '#4b586a', '--vt-text-3': '#8b96a6',
+      '--vt-accent': '#c96a00', '--vt-accent-ink': '#ffffff', '--vt-cyan': '#0969da', '--vt-green': '#1a7f37', '--vt-red': '#cf222e'
+    };
+    return {
+      '--vt-bg-0': '#0b0e14', '--vt-bg-1': '#11151d', '--vt-bg-2': '#171c26', '--vt-bg-3': '#1e2531',
+      '--vt-border': '#242c3a', '--vt-border-2': '#334055',
+      '--vt-text': '#d7dce4', '--vt-text-2': '#98a3b3', '--vt-text-3': '#5d6b7e',
+      '--vt-accent': '#ffb454', '--vt-accent-ink': '#2a1c05', '--vt-cyan': '#59c2ff', '--vt-green': '#7fd962', '--vt-red': '#ff7676'
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const t = this.I18N[s.lang];
+    const rootStyle = Object.assign({}, this.colors(), {
+      display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden',
+      fontFamily: "'Be Vietnam Pro', system-ui, sans-serif", background: 'var(--vt-bg-0)', color: 'var(--vt-text)'
+    });
+
+    const taStyle = "width:100%;min-height:300px;resize:vertical;background:var(--vt-bg-0);color:var(--vt-text);border:1px solid var(--vt-border);border-radius:9px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6;outline:none";
+    const taStyleSm = taStyle.replace('min-height:300px', 'min-height:120px');
+    const inStyle = "background:var(--vt-bg-0);color:var(--vt-text);border:1px solid var(--vt-border);border-radius:8px;padding:9px 12px;font-family:'JetBrains Mono',monospace;font-size:14px;outline:none;width:100%";
+    const btnPrimary = "display:inline-flex;align-items:center;gap:6px;background:var(--vt-accent);color:var(--vt-accent-ink);border:none;border-radius:8px;padding:9px 15px;font:600 13px 'Be Vietnam Pro',sans-serif;cursor:pointer";
+    const btnGhost = "display:inline-flex;align-items:center;gap:6px;background:var(--vt-bg-2);color:var(--vt-text);border:1px solid var(--vt-border);border-radius:8px;padding:9px 15px;font:600 13px 'Be Vietnam Pro',sans-serif;cursor:pointer";
+    const copyBtn = "flex:0 0 auto;background:var(--vt-bg-2);color:var(--vt-text-2);border:1px solid var(--vt-border);border-radius:6px;padding:5px 10px;font:600 11px 'JetBrains Mono',monospace;cursor:pointer";
+    const lblStyle = "font:600 10px 'JetBrains Mono',monospace;letter-spacing:.6px;text-transform:uppercase;color:var(--vt-text-3);margin-bottom:7px";
+
+    // sidebar groups
+    const sidebarGroups = this.GROUPS.map(g => {
+      const tools = this.TOOLS.filter(x => x.g === g.id);
+      const open = s.expanded[g.id];
+      return {
+        id: g.id, name: this.state.lang === 'vi' ? g.vi : g.en, iconPath: g.icon, open, count: tools.length,
+        caret: "font:400 10px sans-serif;color:var(--vt-text-3);transition:transform .15s;transform:rotate(" + (open ? 90 : 0) + "deg)",
+        onToggle: () => this.setState(st => ({ expanded: Object.assign({}, st.expanded, { [g.id]: !st.expanded[g.id] }) })),
+        tools: tools.map(tl => ({
+          id: tl.id, name: this.toolName(tl), ready: !!tl.ready,
+          rowStyle: "display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12.5px;color:" + (s.activeTool === tl.id ? 'var(--vt-accent)' : 'var(--vt-text-2)') + ";background:" + (s.activeTool === tl.id ? 'var(--vt-bg-2)' : 'transparent'),
+          onSelect: () => this.select(tl.id)
+        }))
+      };
+    });
+
+    const homeGroups = this.GROUPS.map(g => {
+      const tools = this.TOOLS.filter(x => x.g === g.id);
+      return {
+        id: g.id, name: this.state.lang === 'vi' ? g.vi : g.en, iconPath: g.icon, count: tools.length,
+        sample: tools.slice(0, 4).map(x => this.toolName(x)).join(' · '),
+        onOpen: () => { this.setState(st => ({ expanded: Object.assign({}, st.expanded, { [g.id]: true }) })); this.select(tools[0].id); }
+      };
+    });
+
+    const recentTools = s.recent.map(id => this.TOOLS.find(x => x.id === id)).filter(Boolean).map(tl => ({ id: tl.id, name: this.toolName(tl), onSelect: () => this.select(tl.id) }));
+
+    // palette
+    const q = s.query.trim().toLowerCase();
+    const matches = this.TOOLS.filter(tl => !q || (tl.vi + ' ' + tl.en + ' ' + tl.kw + ' ' + tl.id).toLowerCase().includes(q));
+    const paletteResults = matches.slice(0, 40).map((tl, i) => ({
+      id: tl.id, name: this.toolName(tl), groupName: this.groupName(tl.g), ready: !!tl.ready, iconPath: this.groupIcon(tl.g),
+      style: "display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:8px;cursor:pointer;background:" + (i === s.active ? 'var(--vt-bg-2)' : 'transparent'),
+      onSelect: () => this.select(tl.id), onHover: () => this.setState({ active: i })
+    }));
+
+    const cur = this.TOOLS.find(x => x.id === s.activeTool);
+    const curTool = cur ? { name: this.toolName(cur), groupName: this.groupName(cur.g), desc: this.toolDesc(cur), ready: !!cur.ready } : {};
+    const isTool = !!cur, ready = cur && cur.ready;
+
+    // case rows
+    const cr = this.caseResults(s.caseIn);
+    const caseRows = Object.keys(cr).map(k => ({ label: k, value: cr[k] || '—', onCopy: () => this.copy(cr[k]) }));
+
+    // slug rows
+    const slugRows = [
+      { label: this.state.lang === 'vi' ? 'Slug (URL)' : 'Slug (URL)', value: this.slugify(s.slugIn) || '—', onCopy: () => this.copy(this.slugify(s.slugIn)) },
+      { label: this.state.lang === 'vi' ? 'Bỏ dấu' : 'No diacritics', value: this.stripDiacritics(s.slugIn) || '—', onCopy: () => this.copy(this.stripDiacritics(s.slugIn)) },
+      { label: 'snake_case', value: this.slugify(s.slugIn).replace(/-/g, '_') || '—', onCopy: () => this.copy(this.slugify(s.slugIn).replace(/-/g, '_')) }
+    ];
+
+    // uuid
+    const uuidTypes = ['uuid', 'ulid', 'nanoid'].map(ty => ({
+      label: ty === 'uuid' ? 'UUID v4' : ty === 'ulid' ? 'ULID' : 'NanoID',
+      onPick: () => this.setState({ uuidType: ty }),
+      style: "background:" + (s.uuidType === ty ? 'var(--vt-accent)' : 'var(--vt-bg-2)') + ";color:" + (s.uuidType === ty ? 'var(--vt-accent-ink)' : 'var(--vt-text)') + ";border:1px solid " + (s.uuidType === ty ? 'var(--vt-accent)' : 'var(--vt-border)') + ";border-radius:8px;padding:9px 15px;font:600 13px 'Be Vietnam Pro',sans-serif;cursor:pointer"
+    }));
+    const uuidRows = s.uuidOut.map((v, i) => ({ n: String(i + 1).padStart(2, '0'), value: v, onCopy: () => this.copy(v) }));
+
+    // timestamp
+    const tsN = parseInt(s.tsIn, 10);
+    const tsValid = s.tsIn !== '' && !isNaN(tsN) && tsN > -62135596800 && tsN < 253402300799;
+    let tsRows = [];
+    if (tsValid) {
+      const d = new Date(tsN * 1000);
+      const loc = this.state.lang === 'vi' ? 'vi-VN' : 'en-US';
+      const now = Date.now(), diff = Math.round((tsN * 1000 - now) / 1000);
+      const rel = this.humanRel(diff);
+      tsRows = [
+        { label: 'ISO 8601', value: d.toISOString(), onCopy: () => this.copy(d.toISOString()) },
+        { label: this.state.lang === 'vi' ? 'Giờ địa phương' : 'Local', value: d.toLocaleString(loc), onCopy: () => this.copy(d.toLocaleString(loc)) },
+        { label: 'UTC', value: d.toUTCString(), onCopy: () => this.copy(d.toUTCString()) },
+        { label: this.state.lang === 'vi' ? 'Tương đối' : 'Relative', value: rel, onCopy: () => this.copy(rel) },
+        { label: 'Milliseconds', value: String(tsN * 1000), onCopy: () => this.copy(String(tsN * 1000)) }
+      ];
+    }
+
+    // hash
+    const hashRows = ['SHA-1', 'SHA-256', 'SHA-512'].filter(k => s.hashOut[k]).map(k => ({ label: k, value: s.hashOut[k], onCopy: () => this.copy(s.hashOut[k]) }));
+
+    // lunar
+    let lunarBig = '—', lunarSub = '', lunarRows = [];
+    if (s.lunarDate) {
+      const p = s.lunarDate.split('-').map(Number);
+      if (p.length === 3 && p[0]) {
+        const L = this.solar2lunar(p[2], p[1], p[0]);
+        lunarBig = L.day + '/' + L.month + (L.leap ? 'N' : '');
+        lunarSub = (this.state.lang === 'vi' ? 'Ngày ' + L.day + ' tháng ' + L.month + (L.leap ? ' (nhuận)' : '') + ' năm ' + this.canChi(L.year) : 'Day ' + L.day + ', month ' + L.month + (L.leap ? ' (leap)' : '') + ', ' + this.canChi(L.year));
+        lunarRows = [
+          { label: this.state.lang === 'vi' ? 'Ngày' : 'Day', value: String(L.day) },
+          { label: t.lunarMonth, value: L.month + (L.leap ? (this.state.lang === 'vi' ? ' (nhuận)' : ' (leap)') : '') },
+          { label: t.canChi, value: this.canChi(L.year) },
+          { label: t.lunarLeap, value: L.leap ? t.yes : t.no }
+        ];
+      }
+    }
+
+    return {
+      rootStyle, t, lang: s.lang, langLabel: s.lang.toUpperCase() + ' →' + (s.lang === 'vi' ? 'EN' : 'VI'),
+      themeIcon: s.theme === 'dark' ? 'M12 3v2M12 19v2M5 5l1.5 1.5M17.5 17.5L19 19M3 12h2M19 12h2M5 19l1.5-1.5M17.5 6.5L19 5M12 8a4 4 0 100 8 4 4 0 000-8z' : 'M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z',
+      goHome: () => this.setState({ activeTool: null }),
+      openPalette: () => this.setState({ paletteOpen: true, query: '', active: 0 }),
+      closePalette: () => this.setState({ paletteOpen: false }),
+      stop: (e) => e.stopPropagation(),
+      toggleLang: () => this.setState(st => ({ lang: st.lang === 'vi' ? 'en' : 'vi' })),
+      toggleTheme: () => this.setState(st => ({ theme: st.theme === 'dark' ? 'light' : 'dark' })),
+      setPin: (el) => { this._pin = el; },
+      onQuery: (e) => this.setState({ query: e.target.value, active: 0 }),
+      onPaletteKey: (e) => {
+        if (e.key === 'ArrowDown') { e.preventDefault(); this.setState(st => ({ active: Math.min(st.active + 1, matches.length - 1) })); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); this.setState(st => ({ active: Math.max(st.active - 1, 0) })); }
+        else if (e.key === 'Enter') { const pick = matches[s.active]; if (pick) this.select(pick.id); }
+      },
+      query: s.query, paletteOpen: s.paletteOpen, paletteResults, paletteEmpty: matches.length === 0,
+      sidebarGroups, homeGroups, recentTools, hasQuickList: recentTools.length > 0,
+      isHome: !isTool, isTool, curTool, totalTools: this.TOOLS.length,
+      taStyle, taStyleSm, inStyle, btnPrimary, btnGhost, copyBtn, lblStyle,
+      // json
+      isJson: s.activeTool === 'json', jsonIn: s.jsonIn, jsonOut: s.jsonOut, jsonStatus: s.jsonStatus,
+      jsonStatusStyle: "display:inline-flex;align-items:center;padding:9px 14px;border-radius:8px;font:600 12px 'JetBrains Mono',monospace;background:var(--vt-bg-1);border:1px solid " + (s.jsonOk ? 'var(--vt-border)' : 'var(--vt-red)') + ";color:" + (s.jsonOk ? 'var(--vt-green)' : 'var(--vt-red)'),
+      onJsonIn: (e) => this.setState({ jsonIn: e.target.value }),
+      jsonFormat: () => this.jsonFmt(2), jsonMinify: () => this.jsonFmt(0), jsonClear: () => this.setState({ jsonIn: '', jsonOut: '', jsonStatus: '' }),
+      // base64
+      isB64: s.activeTool === 'base64', b64in: s.b64in, b64out: this.b64compute(s.b64in, s.b64mode),
+      onB64In: (e) => this.setState({ b64in: e.target.value }),
+      b64enc: () => this.setState({ b64mode: 'encode' }), b64dec: () => this.setState({ b64mode: 'decode' }),
+      b64encStyle: "padding:8px 18px;border:none;cursor:pointer;font:600 13px 'Be Vietnam Pro',sans-serif;background:" + (s.b64mode === 'encode' ? 'var(--vt-accent)' : 'var(--vt-bg-2)') + ";color:" + (s.b64mode === 'encode' ? 'var(--vt-accent-ink)' : 'var(--vt-text)'),
+      b64decStyle: "padding:8px 18px;border:none;cursor:pointer;font:600 13px 'Be Vietnam Pro',sans-serif;background:" + (s.b64mode === 'decode' ? 'var(--vt-accent)' : 'var(--vt-bg-2)') + ";color:" + (s.b64mode === 'decode' ? 'var(--vt-accent-ink)' : 'var(--vt-text)'),
+      // case
+      isCase: s.activeTool === 'case', caseIn: s.caseIn, caseRows, onCaseIn: (e) => this.setState({ caseIn: e.target.value }),
+      // slug
+      isSlug: s.activeTool === 'slugify', slugIn: s.slugIn, slugRows, onSlugIn: (e) => this.setState({ slugIn: e.target.value }),
+      // uuid
+      isUuid: s.activeTool === 'uuid', uuidTypes, uuidRows, uuidGen: () => this.uuidGen(), uuidCopyAll: () => this.copy(s.uuidOut.join('\n')),
+      // timestamp
+      isTs: s.activeTool === 'timestamp', tsIn: s.tsIn, tsValid, tsInvalid: s.tsIn !== '' && !tsValid, tsRows,
+      onTsIn: (e) => this.setState({ tsIn: e.target.value }), tsNow: () => this.setState({ tsIn: String(Math.floor(Date.now() / 1000)) }),
+      // hash
+      isHash: s.activeTool === 'hash', hashIn: s.hashIn, hashRows, onHashIn: (e) => { this.setState({ hashIn: e.target.value }); this.computeHash(e.target.value); },
+      // lunar
+      isLunar: s.activeTool === 'lunar', lunarDate: s.lunarDate, lunarBig, lunarSub, lunarRows,
+      onLunarDate: (e) => this.setState({ lunarDate: e.target.value }), lunarToday: () => this.setState({ lunarDate: new Date().toISOString().slice(0, 10) }),
+      // coming soon
+      isSoon: isTool && !ready
+    };
+  }
+
+  humanRel(diff) {
+    const vi = this.state.lang === 'vi';
+    const abs = Math.abs(diff); const fut = diff > 0;
+    const u = [[31536000, vi ? 'năm' : 'yr'], [2592000, vi ? 'tháng' : 'mo'], [86400, vi ? 'ngày' : 'd'], [3600, vi ? 'giờ' : 'h'], [60, vi ? 'phút' : 'min'], [1, vi ? 'giây' : 's']];
+    for (const [sec, lbl] of u) { if (abs >= sec) { const n = Math.floor(abs / sec); return vi ? (fut ? 'sau ' + n + ' ' + lbl + ' nữa' : n + ' ' + lbl + ' trước') : (fut ? 'in ' + n + ' ' + lbl : n + ' ' + lbl + ' ago'); } }
+    return vi ? 'bây giờ' : 'now';
+  }
+
+  toolDesc(tl) {
+    const d = {
+      case: ['Chuyển đổi giữa UPPER, lower, camelCase, snake_case, kebab-case và nhiều kiểu khác.', 'Convert between UPPER, lower, camelCase, snake_case, kebab-case and more.'],
+      slugify: ['Tạo slug thân thiện URL và bỏ dấu tiếng Việt — hữu ích cho đường dẫn và tên tệp.', 'Create URL-friendly slugs and strip Vietnamese diacritics — great for paths and filenames.'],
+      json: ['Định dạng, thu gọn và kiểm tra tính hợp lệ của JSON, ngay trong trình duyệt.', 'Format, minify and validate JSON, entirely in your browser.'],
+      base64: ['Mã hóa và giải mã Base64 với hỗ trợ đầy đủ Unicode (UTF-8).', 'Encode and decode Base64 with full Unicode (UTF-8) support.'],
+      uuid: ['Sinh UUID v4, ULID và NanoID bằng bộ sinh số ngẫu nhiên mã hóa của trình duyệt.', 'Generate UUID v4, ULID and NanoID using the browser crypto RNG.'],
+      timestamp: ['Chuyển đổi Unix timestamp sang ngày giờ ở nhiều định dạng và ngược lại.', 'Convert Unix timestamps to human dates in multiple formats.'],
+      hash: ['Tính giá trị băm SHA-1 / SHA-256 / SHA-512 qua Web Crypto API.', 'Compute SHA-1 / SHA-256 / SHA-512 hashes via the Web Crypto API.'],
+      lunar: ['Đổi ngày dương lịch sang âm lịch Việt Nam kèm can chi — theo thuật toán Hồ Ngọc Đức.', 'Convert solar dates to the Vietnamese lunar calendar with can-chi — Ho Ngoc Duc algorithm.']
+    };
+    const v = d[tl.id];
+    return v ? (this.state.lang === 'vi' ? v[0] : v[1]) : (this.state.lang === 'vi' ? 'Công cụ này đang được hoàn thiện.' : 'This tool is in progress.');
+  }
+}
+</script>
+</body>
+</html>
