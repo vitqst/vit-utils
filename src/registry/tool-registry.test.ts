@@ -112,6 +112,8 @@ describe("tool registry", () => {
       "jwt",
       "sql",
       "cron",
+      "curl",
+      "json-types",
     ];
     const readyDeveloperTools = toolRegistry.filter(
       (tool) => tool.group === "developer",

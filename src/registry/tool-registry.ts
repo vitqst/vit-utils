@@ -65,6 +65,14 @@ export const toolRegistry = [
     load: () => import("../tools/cron"),
   },
   {
+    ...catalogEntry("curl"),
+    load: () => import("../tools/curl"),
+  },
+  {
+    ...catalogEntry("json-types"),
+    load: () => import("../tools/json-types"),
+  },
+  {
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },

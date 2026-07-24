@@ -215,6 +215,7 @@ export const toolCatalog = [
       "Chuyển lệnh curl thành fetch trình duyệt và mã cho các ngôn ngữ phổ biến.",
     ),
     { en: ["curl", "fetch", "HTTP", "code"], vi: ["curl", "fetch", "HTTP", "mã nguồn"] },
+    "ready",
   ),
   tool(
     "json-types",
@@ -225,6 +226,7 @@ export const toolCatalog = [
       "Suy luận interface TypeScript dễ đọc từ mẫu JSON.",
     ),
     { en: ["JSON", "TypeScript", "types", "interface"], vi: ["JSON", "TypeScript", "kiểu", "interface"] },
+    "ready",
   ),
   tool(
     "timestamp",
