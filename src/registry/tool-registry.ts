@@ -57,6 +57,14 @@ export const toolRegistry = [
     load: () => import("../tools/jwt"),
   },
   {
+    ...catalogEntry("sql"),
+    load: () => import("../tools/sql"),
+  },
+  {
+    ...catalogEntry("cron"),
+    load: () => import("../tools/cron"),
+  },
+  {
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },

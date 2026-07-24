@@ -193,6 +193,7 @@ export const toolCatalog = [
       "Định dạng các phương ngữ SQL phổ biến để chỉnh sửa dễ đọc.",
     ),
     { en: ["SQL", "format", "query", "database"], vi: ["SQL", "định dạng", "truy vấn", "cơ sở dữ liệu"] },
+    "ready",
   ),
   tool(
     "cron",
@@ -203,6 +204,7 @@ export const toolCatalog = [
       "Tạo biểu thức cron và xem trước các lần chạy sắp tới theo giờ địa phương.",
     ),
     { en: ["cron", "schedule", "next run"], vi: ["cron", "lịch chạy", "lần chạy tiếp"] },
+    "ready",
   ),
   tool(
     "curl",

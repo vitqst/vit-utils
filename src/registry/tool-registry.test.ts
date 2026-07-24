@@ -105,7 +105,14 @@ describe("tool registry", () => {
   });
 
   it("exposes implemented Developer & Data tools as lazy routes", () => {
-    const readyDeveloperIds = ["json", "base64", "data-convert", "jwt"];
+    const readyDeveloperIds = [
+      "json",
+      "base64",
+      "data-convert",
+      "jwt",
+      "sql",
+      "cron",
+    ];
     const readyDeveloperTools = toolRegistry.filter(
       (tool) => tool.group === "developer",
     );
