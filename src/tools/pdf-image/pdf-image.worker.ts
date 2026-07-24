@@ -109,7 +109,7 @@ async function pdfToImages(request: ConvertRequest) {
     const bytes =
       pages.length === 1
         ? rendered[metadata.name]
-        : zipSync(rendered, { level: 6, mtime: 0 });
+        : zipSync(rendered, { level: 6, mtime: new Date(1980, 0, 1) });
     const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
     post({ type: "result", id: request.id, bytes: buffer, ...metadata }, [buffer]);
   } finally {

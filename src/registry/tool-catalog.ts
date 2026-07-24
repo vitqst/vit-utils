@@ -413,6 +413,7 @@ export const toolCatalog = [
       "Tạo và xem tệp ZIP cục bộ với kiểm soát giải nén an toàn.",
     ),
     { en: ["ZIP", "archive", "compress", "extract"], vi: ["ZIP", "nén", "giải nén", "tệp"] },
+    "ready",
   ),
   tool(
     "checksum",

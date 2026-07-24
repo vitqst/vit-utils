@@ -85,7 +85,7 @@ async function generate(request: GenerateRequest) {
       buildBrowserConfig(request.themeColor),
     );
     files["favicon-links.html"] = strToU8(buildFaviconHtml());
-    const archive = zipSync(files, { level: 6, mtime: 0 });
+    const archive = zipSync(files, { level: 6, mtime: new Date(1980, 0, 1) });
     post(
       {
         type: "result",
@@ -113,4 +113,3 @@ self.onmessage = (event: MessageEvent<Request>) => {
   }
   void generate(event.data);
 };
-

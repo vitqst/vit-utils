@@ -137,6 +137,10 @@ export const toolRegistry = [
     load: () => import("../tools/sheets"),
   },
   {
+    ...catalogEntry("zip"),
+    load: () => import("../tools/zip"),
+  },
+  {
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },
