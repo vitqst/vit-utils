@@ -391,6 +391,7 @@ export const toolCatalog = [
       "Kết xuất trang PDF thành ảnh hoặc ghép ảnh thành PDF.",
     ),
     { en: ["PDF", "image", "PNG", "JPEG"], vi: ["PDF", "ảnh", "PNG", "JPEG"] },
+    "ready",
   ),
   tool(
     "sheets",

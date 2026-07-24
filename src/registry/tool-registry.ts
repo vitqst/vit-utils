@@ -129,6 +129,10 @@ export const toolRegistry = [
     load: () => import("../tools/pdf"),
   },
   {
+    ...catalogEntry("pdf-image"),
+    load: () => import("../tools/pdf-image"),
+  },
+  {
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },
