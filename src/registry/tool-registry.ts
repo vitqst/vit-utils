@@ -89,6 +89,14 @@ export const toolRegistry = [
     load: () => import("../tools/date-diff"),
   },
   {
+    ...catalogEntry("duration"),
+    load: () => import("../tools/duration"),
+  },
+  {
+    ...catalogEntry("working-days"),
+    load: () => import("../tools/working-days"),
+  },
+  {
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },

@@ -281,6 +281,7 @@ export const toolCatalog = [
       "Đổi thời lượng giữa mili giây, dạng đồng hồ và văn bản dễ đọc.",
     ),
     { en: ["duration", "milliseconds", "humanize", "time"], vi: ["thời lượng", "mili giây", "diễn giải"] },
+    "ready",
   ),
   tool(
     "working-days",
@@ -291,6 +292,7 @@ export const toolCatalog = [
       "Đếm ngày làm việc với cuối tuần tùy chọn và danh sách ngày nghỉ.",
     ),
     { en: ["working days", "business days", "weekend", "holiday"], vi: ["ngày làm việc", "cuối tuần", "ngày nghỉ"] },
+    "ready",
   ),
   tool(
     "ids",
