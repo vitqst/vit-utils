@@ -1,9 +1,15 @@
 import type { ToolDefinition } from "./types";
 import { toolCatalog } from "./tool-catalog";
 
+function catalogEntry(id: string) {
+  const entry = toolCatalog.find((tool) => tool.id === id);
+  if (!entry) throw new Error(`Missing tool catalog entry: ${id}`);
+  return entry;
+}
+
 export const toolRegistry = [
   {
-    ...toolCatalog[0],
+    ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },
 ] satisfies ToolDefinition[];

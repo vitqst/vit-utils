@@ -655,7 +655,7 @@ function ToolPage({
             </div>
           }
         >
-          <Tool />
+          <Tool locale={locale} />
         </Suspense>
       </div>
     </main>

@@ -15,8 +15,12 @@ export interface LocalizedText {
   vi: string;
 }
 
+export interface ToolComponentProps {
+  locale: Locale;
+}
+
 export interface ToolModule {
-  default: ComponentType;
+  default: ComponentType<ToolComponentProps>;
 }
 
 export interface ToolDefinition {
@@ -28,6 +32,6 @@ export interface ToolDefinition {
   icon: "aperture";
   path: `/tools/${string}`;
   privacy: "local-only";
-  status: "ready";
+  status: "ready" | "planned";
   load: () => Promise<ToolModule>;
 }

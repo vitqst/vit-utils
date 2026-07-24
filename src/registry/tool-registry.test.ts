@@ -1,8 +1,67 @@
 import { describe, expect, it } from "vitest";
 
+import { groupCatalog, plannedToolCount } from "./group-catalog";
+import { toolCatalog } from "./tool-catalog";
 import { getToolByPath, toolRegistry } from "./tool-registry";
 
 describe("tool registry", () => {
+  const advertisedIds = [
+    "case-convert",
+    "slugify",
+    "diff",
+    "word-count",
+    "line-tools",
+    "regex",
+    "lorem",
+    "unicode",
+    "json",
+    "base64",
+    "data-convert",
+    "jwt",
+    "sql",
+    "cron",
+    "curl",
+    "json-types",
+    "timestamp",
+    "lunar",
+    "timezone",
+    "date-diff",
+    "duration",
+    "working-days",
+    "ids",
+    "password",
+    "qr",
+    "barcode",
+    "mock",
+    "meta",
+    "favicon",
+    "pdf",
+    "pdf-image",
+    "sheets",
+    "zip",
+    "checksum",
+    "hash",
+    "strength",
+    "hibp",
+    "certificate",
+    "hmac",
+    "photo-cure",
+    "photo-collage",
+  ];
+
+  it("uses the tool catalog as metadata source for all 41 advertised tools", () => {
+    expect(toolCatalog.map((tool) => tool.id)).toEqual(advertisedIds);
+    expect(plannedToolCount).toBe(41);
+    expect(groupCatalog.flatMap((group) => group.tools.map((tool) => tool.id))).toEqual(
+      advertisedIds,
+    );
+    expect(
+      groupCatalog.flatMap((group) =>
+        group.tools.map((tool) => toolCatalog.find((entry) => entry.id === tool.id)),
+      ),
+    ).not.toContain(undefined);
+  });
+
   it("exposes Photo Cure as a private lazy-loaded media tool", () => {
     const photoCure = toolRegistry.find((tool) => tool.id === "photo-cure");
 
@@ -25,6 +84,14 @@ describe("tool registry", () => {
   });
 
   it("keeps registry ids and paths unique", () => {
+    expect(new Set(toolCatalog.map((tool) => tool.id))).toHaveProperty(
+      "size",
+      toolCatalog.length,
+    );
+    expect(new Set(toolCatalog.map((tool) => tool.path))).toHaveProperty(
+      "size",
+      toolCatalog.length,
+    );
     expect(new Set(toolRegistry.map((tool) => tool.id))).toHaveProperty(
       "size",
       toolRegistry.length,
