@@ -129,6 +129,20 @@ describe("tool registry", () => {
     });
   });
 
+  it("exposes implemented Date & Time tools as lazy routes", () => {
+    const readyDateIds = ["timestamp", "lunar"];
+    const readyDateTools = toolRegistry.filter(
+      (tool) => tool.group === "date-time",
+    );
+
+    expect(readyDateTools.map((tool) => tool.id)).toEqual(readyDateIds);
+    readyDateTools.forEach((tool) => {
+      expect(tool).toMatchObject({ status: "ready", group: "date-time" });
+      expect(tool.load).toEqual(expect.any(Function));
+      expect(getToolByPath(tool.path)).toBe(tool);
+    });
+  });
+
   it("keeps registry ids and paths unique", () => {
     expect(new Set(toolCatalog.map((tool) => tool.id))).toHaveProperty(
       "size",

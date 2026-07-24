@@ -73,6 +73,14 @@ export const toolRegistry = [
     load: () => import("../tools/json-types"),
   },
   {
+    ...catalogEntry("timestamp"),
+    load: () => import("../tools/timestamp"),
+  },
+  {
+    ...catalogEntry("lunar"),
+    load: () => import("../tools/lunar"),
+  },
+  {
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },

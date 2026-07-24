@@ -237,6 +237,7 @@ export const toolCatalog = [
       "Đổi giây hoặc mili giây Unix thành ngày giờ địa phương và UTC.",
     ),
     { en: ["Unix", "timestamp", "epoch", "UTC"], vi: ["Unix", "timestamp", "epoch", "UTC"] },
+    "ready",
   ),
   tool(
     "lunar",
@@ -247,6 +248,7 @@ export const toolCatalog = [
       "Chuyển đổi ngày giữa âm lịch Việt Nam và dương lịch.",
     ),
     { en: ["lunar", "calendar", "Vietnamese", "Gregorian"], vi: ["âm lịch", "dương lịch", "ngày tháng"] },
+    "ready",
   ),
   tool(
     "timezone",
