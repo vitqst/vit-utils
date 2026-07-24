@@ -81,6 +81,14 @@ export const toolRegistry = [
     load: () => import("../tools/lunar"),
   },
   {
+    ...catalogEntry("timezone"),
+    load: () => import("../tools/timezone"),
+  },
+  {
+    ...catalogEntry("date-diff"),
+    load: () => import("../tools/date-diff"),
+  },
+  {
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },

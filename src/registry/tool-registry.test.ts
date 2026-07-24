@@ -130,7 +130,7 @@ describe("tool registry", () => {
   });
 
   it("exposes implemented Date & Time tools as lazy routes", () => {
-    const readyDateIds = ["timestamp", "lunar"];
+    const readyDateIds = ["timestamp", "lunar", "timezone", "date-diff"];
     const readyDateTools = toolRegistry.filter(
       (tool) => tool.group === "date-time",
     );

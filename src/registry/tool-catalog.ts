@@ -259,6 +259,7 @@ export const toolCatalog = [
       "So sánh cùng một thời điểm giữa các múi giờ IANA có quy tắc giờ mùa hè.",
     ),
     { en: ["timezone", "IANA", "UTC", "DST"], vi: ["múi giờ", "IANA", "UTC", "giờ mùa hè"] },
+    "ready",
   ),
   tool(
     "date-diff",
@@ -269,6 +270,7 @@ export const toolCatalog = [
       "Tính chênh lệch theo lịch và thời gian thực giữa hai ngày.",
     ),
     { en: ["date", "difference", "days", "elapsed"], vi: ["ngày", "khoảng cách", "chênh lệch"] },
+    "ready",
   ),
   tool(
     "duration",
