@@ -125,6 +125,10 @@ export const toolRegistry = [
     load: () => import("../tools/favicon"),
   },
   {
+    ...catalogEntry("pdf"),
+    load: () => import("../tools/pdf"),
+  },
+  {
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },

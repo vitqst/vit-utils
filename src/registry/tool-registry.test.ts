@@ -174,6 +174,18 @@ describe("tool registry", () => {
     });
   });
 
+  it("exposes implemented Files & Documents tools as lazy routes", () => {
+    const readyFileIds = ["pdf"];
+    const readyFileTools = toolRegistry.filter((tool) => tool.group === "files");
+
+    expect(readyFileTools.map((tool) => tool.id)).toEqual(readyFileIds);
+    readyFileTools.forEach((tool) => {
+      expect(tool).toMatchObject({ status: "ready", group: "files" });
+      expect(tool.load).toEqual(expect.any(Function));
+      expect(getToolByPath(tool.path)).toBe(tool);
+    });
+  });
+
   it("keeps registry ids and paths unique", () => {
     expect(new Set(toolCatalog.map((tool) => tool.id))).toHaveProperty(
       "size",

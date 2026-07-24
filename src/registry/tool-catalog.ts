@@ -380,6 +380,7 @@ export const toolCatalog = [
       "Gộp, tách, sắp xếp lại hoặc xoay các trang PDF cục bộ.",
     ),
     { en: ["PDF", "merge", "split", "rotate"], vi: ["PDF", "gộp", "tách", "xoay"] },
+    "ready",
   ),
   tool(
     "pdf-image",
