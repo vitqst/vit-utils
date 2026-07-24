@@ -25,6 +25,14 @@ export const toolRegistry = [
     load: () => import("../tools/word-count"),
   },
   {
+    ...catalogEntry("line-tools"),
+    load: () => import("../tools/line-tools"),
+  },
+  {
+    ...catalogEntry("regex"),
+    load: () => import("../tools/regex"),
+  },
+  {
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },

@@ -89,6 +89,8 @@ describe("tool registry", () => {
       "slugify",
       "diff",
       "word-count",
+      "line-tools",
+      "regex",
     ];
     const readyTextTools = toolRegistry.filter((tool) => tool.group === "text");
 

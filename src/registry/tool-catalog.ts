@@ -96,6 +96,7 @@ export const toolCatalog = [
       en: ["sort", "dedupe", "lines", "unique", "reverse"],
       vi: ["sắp xếp", "lọc trùng", "dòng", "đảo"],
     },
+    "ready",
   ),
   tool(
     "regex",
@@ -109,6 +110,7 @@ export const toolCatalog = [
       en: ["regex", "regular expression", "matches", "flags"],
       vi: ["regex", "biểu thức chính quy", "kết quả", "cờ"],
     },
+    "ready",
   ),
   tool(
     "lorem",
