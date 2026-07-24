@@ -149,6 +149,7 @@ export const toolCatalog = [
       "Kiểm tra, định dạng, sắp xếp và thu gọn JSON với vị trí lỗi chính xác.",
     ),
     { en: ["JSON", "format", "validate", "minify"], vi: ["JSON", "định dạng", "kiểm tra", "thu gọn"] },
+    "ready",
   ),
   tool(
     "base64",
@@ -159,6 +160,7 @@ export const toolCatalog = [
       "Mã hóa và giải mã văn bản UTF-8 hoặc tệp cục bộ bằng Base64.",
     ),
     { en: ["Base64", "encode", "decode", "file"], vi: ["Base64", "mã hóa", "giải mã", "tệp"] },
+    "ready",
   ),
   tool(
     "data-convert",

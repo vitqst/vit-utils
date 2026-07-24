@@ -41,6 +41,14 @@ export const toolRegistry = [
     load: () => import("../tools/unicode"),
   },
   {
+    ...catalogEntry("json"),
+    load: () => import("../tools/json"),
+  },
+  {
+    ...catalogEntry("base64"),
+    load: () => import("../tools/base64"),
+  },
+  {
     ...catalogEntry("photo-cure"),
     load: () => import("../tools/photo-cure"),
   },

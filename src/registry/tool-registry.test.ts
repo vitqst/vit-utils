@@ -104,6 +104,22 @@ describe("tool registry", () => {
     });
   });
 
+  it("exposes implemented Developer & Data tools as lazy routes", () => {
+    const readyDeveloperIds = ["json", "base64"];
+    const readyDeveloperTools = toolRegistry.filter(
+      (tool) => tool.group === "developer",
+    );
+
+    expect(readyDeveloperTools.map((tool) => tool.id)).toEqual(
+      readyDeveloperIds,
+    );
+    readyDeveloperTools.forEach((tool) => {
+      expect(tool).toMatchObject({ status: "ready", group: "developer" });
+      expect(tool.load).toEqual(expect.any(Function));
+      expect(getToolByPath(tool.path)).toBe(tool);
+    });
+  });
+
   it("keeps registry ids and paths unique", () => {
     expect(new Set(toolCatalog.map((tool) => tool.id))).toHaveProperty(
       "size",
