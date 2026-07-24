@@ -19,6 +19,7 @@
     "@headlessui/react": "^2.2.10",
     "@radix-ui/react-tooltip": "^1.2.14",
     "croner": "^10.0.1",
+    "fflate": "^0.8.3",
     "jsbarcode": "^3.12.3",
     "qrcode": "^1.5.4",
     "react": "^19.2.7",

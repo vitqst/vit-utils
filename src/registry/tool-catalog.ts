@@ -369,6 +369,7 @@ export const toolCatalog = [
       "Tạo gói favicon và tài nguyên manifest cục bộ từ một ảnh.",
     ),
     { en: ["favicon", "icon", "manifest", "image"], vi: ["favicon", "biểu tượng", "manifest", "ảnh"] },
+    "ready",
   ),
   tool(
     "pdf",

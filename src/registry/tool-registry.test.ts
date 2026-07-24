@@ -158,6 +158,7 @@ describe("tool registry", () => {
       "barcode",
       "mock",
       "meta",
+      "favicon",
     ];
     const readyGeneratorTools = toolRegistry.filter(
       (tool) => tool.group === "generators",
