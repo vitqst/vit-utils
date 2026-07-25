@@ -1,0 +1,50 @@
+name: Feature request
+description: Propose a focused improvement or a new browser-local tool.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Explain the user problem before proposing an implementation. New network access requires a product specification and security review.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What task is difficult or impossible today, and who experiences it?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed outcome
+      description: Describe the smallest useful behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What existing tools or approaches have you tried?
+    validations:
+      required: false
+  - type: dropdown
+    id: data_boundary
+    attributes:
+      label: Data boundary
+      description: Can the feature work entirely in the browser?
+      options:
+        - Yes, entirely browser-local
+        - Unsure
+        - No, it requires network access
+    validations:
+      required: true
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I am willing to help implement or test this feature.
+          required: false
+

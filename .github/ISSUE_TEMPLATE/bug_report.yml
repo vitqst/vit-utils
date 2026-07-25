@@ -1,0 +1,66 @@
+name: Bug report
+description: Report reproducible behavior that is not working as expected.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. Do not attach private files, filenames, passwords, tokens, or personal data.
+        Report vulnerabilities through the private process in `docs/SECURITY.md`.
+  - type: input
+    id: route
+    attributes:
+      label: Tool route
+      description: Which route or tool is affected?
+      placeholder: /tools/example
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the observed behavior using synthetic data.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      placeholder: |
+        1. Open ...
+        2. Select ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and operating system
+      placeholder: Firefox 141 on Ubuntu 24.04
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add screenshots or console output only after removing sensitive data.
+    validations:
+      required: false
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: I removed private files, filenames, passwords, tokens, and personal data.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true
+

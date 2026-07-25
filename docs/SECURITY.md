@@ -1,5 +1,20 @@
 # Security
 
+## Reporting a vulnerability
+
+Use
+[GitHub private vulnerability reporting](https://github.com/vitqst/Photo-picker-offline/security/advisories/new)
+to report a suspected vulnerability. Do not open a public issue before a fix is
+available.
+
+Include the affected route, impact, reproduction steps, and browser version.
+Use synthetic data only. Do not submit user files, filenames, passwords,
+tokens, personal data, or production secrets.
+
+The maintainer will acknowledge a report when practical, investigate it, and
+coordinate disclosure after a fix is available. No fixed response or resolution
+timeline is promised for this volunteer-maintained project.
+
 ## Data classification
 
 - **User content:** files or text selected for a tool. Never persisted. The HIBP
@@ -26,4 +41,6 @@ Framing, plugins, and remote fonts remain blocked.
 
 ## Reporting
 
-Do not include user files, filenames, tokens, or personal data in an issue. Describe the browser, route, reproduction steps, and observed network request instead.
+For non-sensitive security questions, describe the browser, route, reproduction
+steps, and observed network request in an issue. Never include user files,
+filenames, passwords, tokens, or personal data.

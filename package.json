@@ -2,6 +2,16 @@
   "name": "vit-tools",
   "private": true,
   "version": "1.0.0",
+  "description": "Private-first, single-purpose browser tools.",
+  "author": "vitqst",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vitqst/Photo-picker-offline.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vitqst/Photo-picker-offline/issues"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
