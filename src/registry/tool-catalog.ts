@@ -300,10 +300,10 @@ export const toolCatalog = [
     "generators",
     text("UUID / ULID / NanoID", "UUID / ULID / NanoID"),
     text(
-      "Generate cryptographically random UUIDs, ULIDs, and NanoIDs.",
-      "Tạo UUID, ULID và NanoID ngẫu nhiên bằng nguồn mật mã.",
+      "Generate cryptographically random UUID v4/v7, ULIDs, and NanoIDs.",
+      "Tạo UUID v4/v7, ULID và NanoID ngẫu nhiên bằng nguồn mật mã.",
     ),
-    { en: ["UUID", "ULID", "NanoID", "identifier"], vi: ["UUID", "ULID", "NanoID", "định danh"] },
+    { en: ["UUID", "UUIDv7", "ULID", "NanoID", "identifier"], vi: ["UUID", "UUIDv7", "ULID", "NanoID", "định danh"] },
     "ready",
   ),
   tool(

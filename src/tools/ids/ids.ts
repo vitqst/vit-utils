@@ -1,4 +1,4 @@
-export type IdentifierType = "uuid" | "ulid" | "nanoid";
+export type IdentifierType = "uuid" | "uuid-v7" | "ulid" | "nanoid";
 export type RandomBytes = (length: number) => Uint8Array;
 
 const CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
@@ -13,6 +13,39 @@ export function generateUuid(randomBytes: RandomBytes = secureRandomBytes) {
   if (bytes.length !== 16) throw new Error("Random source returned too few bytes.");
   bytes[6] = (bytes[6] & 0x0f) | 0x40;
   bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = [...bytes].map((byte) => byte.toString(16).padStart(2, "0"));
+  return [
+    hex.slice(0, 4).join(""),
+    hex.slice(4, 6).join(""),
+    hex.slice(6, 8).join(""),
+    hex.slice(8, 10).join(""),
+    hex.slice(10).join(""),
+  ].join("-");
+}
+
+export function generateUuidV7(
+  timestamp = Date.now(),
+  randomBytes: RandomBytes = secureRandomBytes,
+) {
+  if (
+    !Number.isInteger(timestamp) ||
+    timestamp < 0 ||
+    timestamp > 281_474_976_710_655
+  ) {
+    throw new Error("UUID v7 timestamp is outside its 48-bit range.");
+  }
+
+  const bytes = randomBytes(16).slice();
+  if (bytes.length !== 16) throw new Error("Random source returned too few bytes.");
+
+  let timestampValue = BigInt(timestamp);
+  for (let index = 5; index >= 0; index -= 1) {
+    bytes[index] = Number(timestampValue & 0xffn);
+    timestampValue >>= 8n;
+  }
+  bytes[6] = (bytes[6] & 0x0f) | 0x70;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
   const hex = [...bytes].map((byte) => byte.toString(16).padStart(2, "0"));
   return [
     hex.slice(0, 4).join(""),
@@ -107,8 +140,8 @@ export function generateIdentifiers(
   const localUlid = createUlidGenerator(randomBytes);
   return Array.from({ length: count }, () => {
     if (type === "uuid") return generateUuid(randomBytes);
+    if (type === "uuid-v7") return generateUuidV7(Date.now(), randomBytes);
     if (type === "ulid") return randomBytes === secureRandomBytes ? generateUlid() : localUlid();
     return generateNanoId(nanoIdLength, randomBytes);
   });
 }
-

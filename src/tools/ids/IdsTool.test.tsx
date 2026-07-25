@@ -19,6 +19,14 @@ describe("UUID / ULID / NanoID tool", () => {
     );
 
     fireEvent.change(screen.getByRole("combobox", { name: "Identifier type" }), {
+      target: { value: "uuid-v7" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Generate identifiers" }));
+    expect(screen.getByRole("list", { name: "Generated identifiers" })).toHaveTextContent(
+      /[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/,
+    );
+
+    fireEvent.change(screen.getByRole("combobox", { name: "Identifier type" }), {
       target: { value: "nanoid" },
     });
     fireEvent.change(screen.getByRole("spinbutton", { name: "NanoID length" }), {
@@ -49,4 +57,3 @@ describe("UUID / ULID / NanoID tool", () => {
     expect(screen.getByRole("button", { name: "Tạo định danh" })).toBeInTheDocument();
   });
 });
-

@@ -5,6 +5,7 @@ import {
   generateIdentifiers,
   generateNanoId,
   generateUuid,
+  generateUuidV7,
 } from "./ids";
 
 const zeros = (length: number) => new Uint8Array(length);
@@ -12,6 +13,21 @@ const zeros = (length: number) => new Uint8Array(length);
 describe("identifier generation", () => {
   it("sets UUID v4 version and variant bits", () => {
     expect(generateUuid(zeros)).toBe("00000000-0000-4000-8000-000000000000");
+  });
+
+  it("encodes the UUID v7 timestamp, version, and variant bits", () => {
+    expect(generateUuidV7(0x0123_4567_89ab, zeros)).toBe(
+      "01234567-89ab-7000-8000-000000000000",
+    );
+  });
+
+  it("rejects UUID v7 timestamps outside the 48-bit range", () => {
+    expect(() => generateUuidV7(-1, zeros)).toThrow(
+      "UUID v7 timestamp is outside its 48-bit range.",
+    );
+    expect(() => generateUuidV7(281_474_976_710_656, zeros)).toThrow(
+      "UUID v7 timestamp is outside its 48-bit range.",
+    );
   });
 
   it("creates sortable monotonic ULIDs within one millisecond", () => {
@@ -31,6 +47,7 @@ describe("identifier generation", () => {
 
   it("generates bounded batches for each identifier type", () => {
     expect(generateIdentifiers("uuid", 3, 21, zeros)).toHaveLength(3);
+    expect(generateIdentifiers("uuid-v7", 2, 21, zeros)).toHaveLength(2);
     expect(generateIdentifiers("nanoid", 2, 12, zeros)).toEqual([
       "____________",
       "____________",
@@ -39,4 +56,3 @@ describe("identifier generation", () => {
     expect(() => generateNanoId(0, zeros)).toThrow();
   });
 });
-

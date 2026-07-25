@@ -29,7 +29,7 @@ const copy = {
     copyFailed: "Copy failed",
     download: "Download text",
     disclosure:
-      "ULIDs include their millisecond creation time. All random bytes come from Web Crypto.",
+      "UUID v7 values and ULIDs include their millisecond creation time. All random bytes come from Web Crypto.",
   },
   vi: {
     title: "UUID / ULID / NanoID",
@@ -48,7 +48,7 @@ const copy = {
     copyFailed: "Không thể sao chép",
     download: "Tải tệp văn bản",
     disclosure:
-      "ULID chứa thời gian tạo theo mili giây. Mọi byte ngẫu nhiên đều lấy từ Web Crypto.",
+      "UUID v7 và ULID chứa thời gian tạo theo mili giây. Mọi byte ngẫu nhiên đều lấy từ Web Crypto.",
   },
 } as const;
 
@@ -92,6 +92,7 @@ export default function IdsTool({ locale }: ToolComponentProps) {
               className="mt-1.5 w-full rounded-lg border border-[var(--vt-border)] bg-[var(--vt-bg-0)] px-3 py-2 text-sm text-[var(--vt-text)]"
             >
               <option value="uuid">UUID v4</option>
+              <option value="uuid-v7">UUID v7</option>
               <option value="ulid">ULID</option>
               <option value="nanoid">NanoID</option>
             </select>
@@ -191,4 +192,3 @@ export default function IdsTool({ locale }: ToolComponentProps) {
     </ToolWorkspace>
   );
 }
-
