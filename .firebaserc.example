@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "replace-with-your-firebase-project-id"
+  },
+  "targets": {
+    "replace-with-your-firebase-project-id": {
+      "hosting": {
+        "app": [
+          "replace-with-your-firebase-hosting-site-id"
+        ]
+      }
+    }
   }
 }

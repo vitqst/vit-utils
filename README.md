@@ -61,6 +61,34 @@ The development server prints the local URL. Production output is written to
 | `npm run build` | Create the production build |
 | `npm run preview` | Preview the production build |
 | `npm run check` | Run tests, typecheck, and build |
+| `npm run deploy` | Verify and deploy the selected Firebase Hosting site |
+
+## Deploy from your local machine
+
+Install the Firebase CLI and authenticate once:
+
+```sh
+npm install --global firebase-tools
+firebase login
+```
+
+Then select your Firebase project and map this repository's shared `app`
+target to one Hosting site in that project:
+
+```sh
+firebase use --add
+firebase target:apply hosting app YOUR_HOSTING_SITE_ID
+npm run deploy
+```
+
+Use the Hosting **site ID**, not its domain name. You can list the projects
+available to your account with `firebase projects:list` and the sites in the
+selected project with `firebase hosting:sites:list`.
+
+The commands create a local `.firebaserc` containing your project and site
+mapping. That file is ignored by Git, so every contributor can deploy to their
+own Firebase project and site without changing `firebase.json`. To switch to a
+different site, run `firebase target:apply hosting app NEW_SITE_ID` again.
 
 ## Architecture
 

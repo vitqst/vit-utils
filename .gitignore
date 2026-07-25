@@ -3,3 +3,5 @@ dist/
 *.tsbuildinfo
 .playwright-mcp/
 .worktrees/
+.firebaserc
+.firebase/
