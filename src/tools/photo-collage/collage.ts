@@ -14,6 +14,7 @@ export const COLLAGE_IMAGE_TYPES = [
 export type CollageLayout = "grid" | "horizontal" | "vertical";
 export type CollageFit = "fill" | "fit";
 export type CollageFormat = "image/png" | "image/jpeg";
+export type CollageAspect = "original" | "1:1" | "4:5" | "16:9" | "9:16";
 
 export type Rect = {
   x: number;
@@ -21,6 +22,120 @@ export type Rect = {
   width: number;
   height: number;
 };
+
+export type NormalizedRect = Rect;
+
+export type CollageTemplate = {
+  id: "balanced" | "feature-left" | "feature-top" | "columns" | string;
+  naturalAspect: number;
+  cells: readonly NormalizedRect[];
+};
+
+function gridCells(
+  count: number,
+  bounds: NormalizedRect,
+  preferredColumns = Math.ceil(Math.sqrt(count)),
+) {
+  const columns = Math.max(1, Math.min(count, preferredColumns));
+  const rows = Math.ceil(count / columns);
+  return Array.from({ length: count }, (_, index) => {
+    const row = Math.floor(index / columns);
+    const rowStart = row * columns;
+    const rowColumns = Math.min(columns, count - rowStart);
+    const column = index - rowStart;
+    return {
+      x: bounds.x + (column / rowColumns) * bounds.width,
+      y: bounds.y + (row / rows) * bounds.height,
+      width: bounds.width / rowColumns,
+      height: bounds.height / rows,
+    };
+  });
+}
+
+export function getCollageTemplates(count: number): CollageTemplate[] {
+  validateCollageSettings({ count, width: MIN_COLLAGE_WIDTH, gap: 0 });
+  const remaining = count - 1;
+  return [
+    {
+      id: "balanced",
+      naturalAspect: 1,
+      cells: gridCells(count, { x: 0, y: 0, width: 1, height: 1 }),
+    },
+    {
+      id: "feature-left",
+      naturalAspect: 1,
+      cells: [
+        { x: 0, y: 0, width: 0.52, height: 1 },
+        ...gridCells(
+          remaining,
+          { x: 0.52, y: 0, width: 0.48, height: 1 },
+          remaining > 4 ? 2 : 1,
+        ),
+      ],
+    },
+    {
+      id: "feature-top",
+      naturalAspect: 1,
+      cells: [
+        { x: 0, y: 0, width: 1, height: 0.55 },
+        ...gridCells(remaining, { x: 0, y: 0.55, width: 1, height: 0.45 }),
+      ],
+    },
+    {
+      id: "columns",
+      naturalAspect: Math.max(1, count / 2),
+      cells: gridCells(count, { x: 0, y: 0, width: 1, height: 1 }, count),
+    },
+  ];
+}
+
+const aspectRatios: Record<Exclude<CollageAspect, "original">, number> = {
+  "1:1": 1,
+  "4:5": 4 / 5,
+  "16:9": 16 / 9,
+  "9:16": 9 / 16,
+};
+
+export function collageFromTemplate(options: {
+  template: CollageTemplate;
+  aspect: CollageAspect;
+  width: number;
+  gap: number;
+}) {
+  validateCollageSettings({
+    count: options.template.cells.length,
+    width: options.width,
+    gap: options.gap,
+  });
+  const ratio =
+    options.aspect === "original"
+      ? options.template.naturalAspect
+      : aspectRatios[options.aspect];
+  const height = Math.round(options.width / ratio);
+  if (options.width * height > MAX_COLLAGE_PIXELS) {
+    throw new Error("The collage cannot exceed 24 megapixels.");
+  }
+  const leadingGap = Math.ceil(options.gap / 2);
+  const trailingGap = Math.floor(options.gap / 2);
+  const cells = options.template.cells.map((cell) => {
+    const normalizedRight = cell.x + cell.width;
+    const normalizedBottom = cell.y + cell.height;
+    const x =
+      Math.round(cell.x * options.width) + (cell.x > 0 ? leadingGap : 0);
+    const y = Math.round(cell.y * height) + (cell.y > 0 ? leadingGap : 0);
+    const right =
+      Math.round(normalizedRight * options.width) -
+      (normalizedRight < 1 ? trailingGap : 0);
+    const bottom =
+      Math.round(normalizedBottom * height) -
+      (normalizedBottom < 1 ? trailingGap : 0);
+    if (right <= x || bottom <= y) {
+      throw new Error("Spacing leaves no room for collage images.");
+    }
+    return { x, y, width: right - x, height: bottom - y };
+  });
+  return { width: options.width, height, cells };
+}
 
 export function validateCollageSettings(options: {
   count: number;
@@ -166,6 +281,43 @@ export function fillSourceRect(
     x: 0,
     y: (sourceHeight - height) / 2,
     width: sourceWidth,
+    height,
+  };
+}
+
+export function fillSourceRectWithCrop(
+  sourceWidth: number,
+  sourceHeight: number,
+  targetWidth: number,
+  targetHeight: number,
+  zoom = 1,
+  focalX = 0.5,
+  focalY = 0.5,
+): Rect {
+  if (
+    !Number.isFinite(zoom) ||
+    zoom < 1 ||
+    !Number.isFinite(focalX) ||
+    focalX < 0 ||
+    focalX > 1 ||
+    !Number.isFinite(focalY) ||
+    focalY < 0 ||
+    focalY > 1
+  ) {
+    throw new Error("Crop settings are invalid.");
+  }
+  const base = fillSourceRect(
+    sourceWidth,
+    sourceHeight,
+    targetWidth,
+    targetHeight,
+  );
+  const width = base.width / zoom;
+  const height = base.height / zoom;
+  return {
+    x: (sourceWidth - width) * focalX,
+    y: (sourceHeight - height) * focalY,
+    width,
     height,
   };
 }

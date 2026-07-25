@@ -1,10 +1,14 @@
 import {
+  collageFromTemplate,
   fillSourceRect,
+  fillSourceRectWithCrop,
   fitDestinationRect,
   layoutCollage,
+  type CollageAspect,
   type CollageFit,
   type CollageFormat,
   type CollageLayout,
+  type CollageTemplate,
 } from "./collage";
 
 export type CollageImageInput = {
@@ -14,12 +18,20 @@ export type CollageImageInput = {
 };
 
 export type CollageRenderSettings = {
-  layout: CollageLayout;
+  layout?: CollageLayout;
+  template?: CollageTemplate;
+  aspect?: CollageAspect;
   fit: CollageFit;
   gap: number;
+  cornerRadius?: number;
   background: string;
   width: number;
   format: CollageFormat;
+  imageTransforms?: Array<{
+    zoom: number;
+    focalX: number;
+    focalY: number;
+  }>;
 };
 
 type BitmapLike = {
@@ -32,6 +44,17 @@ type ContextLike = {
   fillStyle: string;
   fillRect: (x: number, y: number, width: number, height: number) => void;
   drawImage: (...args: unknown[]) => void;
+  save?: () => void;
+  restore?: () => void;
+  beginPath?: () => void;
+  roundRect?: (
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number,
+  ) => void;
+  clip?: () => void;
 };
 
 export type CanvasLike = {
@@ -63,12 +86,19 @@ export async function renderCollage(
   isCancelled: () => boolean,
   onProgress: (completed: number, total: number) => void = () => undefined,
 ) {
-  const geometry = layoutCollage({
-    layout: request.settings.layout,
-    count: request.images.length,
-    width: request.settings.width,
-    gap: request.settings.gap,
-  });
+  const geometry = request.settings.template
+    ? collageFromTemplate({
+        template: request.settings.template,
+        aspect: request.settings.aspect ?? "original",
+        width: request.settings.width,
+        gap: request.settings.gap,
+      })
+    : layoutCollage({
+        layout: request.settings.layout ?? "grid",
+        count: request.images.length,
+        width: request.settings.width,
+        gap: request.settings.gap,
+      });
   if (!/^#[0-9a-f]{6}$/i.test(request.settings.background)) {
     throw new Error("Background must be a six-digit hex color.");
   }
@@ -87,19 +117,64 @@ export async function renderCollage(
     const canvas = environment.createCanvas(geometry.width, geometry.height);
     const context = canvas.getContext("2d");
     if (!context) throw new Error("Canvas rendering is unavailable.");
+    if (
+      (request.settings.cornerRadius ?? 0) > 0 &&
+      (!context.save ||
+        !context.restore ||
+        !context.beginPath ||
+        !context.roundRect ||
+        !context.clip)
+    ) {
+      throw new Error("Rounded corners are unavailable in this browser.");
+    }
     context.fillStyle = request.settings.background;
     context.fillRect(0, 0, geometry.width, geometry.height);
 
     bitmaps.forEach((bitmap, index) => {
       if (isCancelled()) throw new CollageCancelledError();
       const cell = geometry.cells[index];
-      if (request.settings.fit === "fill") {
-        const source = fillSourceRect(
-          bitmap.width,
-          bitmap.height,
+      const radius = Math.min(
+        request.settings.cornerRadius ?? 0,
+        cell.width / 2,
+        cell.height / 2,
+      );
+      if (
+        radius > 0 &&
+        context.save &&
+        context.restore &&
+        context.beginPath &&
+        context.roundRect &&
+        context.clip
+      ) {
+        context.save();
+        context.beginPath();
+        context.roundRect(
+          cell.x,
+          cell.y,
           cell.width,
           cell.height,
+          radius,
         );
+        context.clip();
+      }
+      if (request.settings.fit === "fill") {
+        const transform = request.settings.imageTransforms?.[index];
+        const source = transform
+          ? fillSourceRectWithCrop(
+              bitmap.width,
+              bitmap.height,
+              cell.width,
+              cell.height,
+              transform.zoom,
+              transform.focalX,
+              transform.focalY,
+            )
+          : fillSourceRect(
+              bitmap.width,
+              bitmap.height,
+              cell.width,
+              cell.height,
+            );
         context.drawImage(
           bitmap,
           source.x,
@@ -126,6 +201,7 @@ export async function renderCollage(
           destination.height,
         );
       }
+      if (radius > 0) context.restore?.();
       onProgress(index + 1, bitmaps.length);
     });
 
@@ -139,4 +215,3 @@ export async function renderCollage(
     bitmaps.forEach((bitmap) => bitmap.close());
   }
 }
-
