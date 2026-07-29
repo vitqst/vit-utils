@@ -1,16 +1,29 @@
 import { describe, expect, it } from "vitest";
 
+import { EFF_LONG_WORDS } from "./eff-long-wordlist";
 import {
   estimatePasswordEntropy,
   generatePassphrase,
   generatePassword,
+  passphraseEntropy,
 } from "./password";
 
 function ascending(length: number) {
   return Uint8Array.from({ length }, (_, index) => index % 256);
 }
 
+function filled(value: number) {
+  return (length: number) => new Uint8Array(length).fill(value);
+}
+
 describe("password generation", () => {
+  it("ships the complete EFF long wordlist in official index order", () => {
+    expect(EFF_LONG_WORDS).toHaveLength(7_776);
+    expect(new Set(EFF_LONG_WORDS).size).toBe(7_776);
+    expect(EFF_LONG_WORDS[0]).toBe("abacus");
+    expect(EFF_LONG_WORDS.at(-1)).toBe("zoom");
+  });
+
   it("guarantees every enabled class and requested length", () => {
     const value = generatePassword(
       {
@@ -76,6 +89,18 @@ describe("password generation", () => {
     );
   });
 
+  it("uses every entry in the 7,776-word EFF long list for generation and entropy", () => {
+    const options = {
+      words: 3,
+      separator: "-",
+      capitalize: false,
+      includeNumber: false,
+    };
+
+    expect(generatePassphrase(options, filled(5))).toBe("zoom-zoom-zoom");
+    expect(passphraseEntropy(options)).toBeCloseTo(3 * Math.log2(7_776));
+  });
+
   it("rejects invalid lengths, word counts, and separators", () => {
     expect(() =>
       generatePassword(
@@ -114,4 +139,3 @@ describe("password generation", () => {
     ).toThrow();
   });
 });
-

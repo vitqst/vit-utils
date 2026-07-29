@@ -1,4 +1,5 @@
 import type { RandomBytes } from "../ids/ids";
+import { EFF_LONG_WORDS } from "./eff-long-wordlist";
 
 export interface PasswordOptions {
   length: number;
@@ -16,22 +17,25 @@ export interface PassphraseOptions {
   includeNumber: boolean;
 }
 
+export type PasswordGenerationErrorCode =
+  | "invalidPasswordLength"
+  | "noCharacterClass"
+  | "passwordTooShort"
+  | "invalidWordCount"
+  | "invalidSeparator";
+
+export class PasswordGenerationError extends Error {
+  constructor(
+    readonly code: PasswordGenerationErrorCode,
+    message: string,
+  ) {
+    super(message);
+    this.name = "PasswordGenerationError";
+  }
+}
+
 const secureRandomBytes: RandomBytes = (length) =>
   crypto.getRandomValues(new Uint8Array(length));
-
-const WORDS = [
-  "amber", "apple", "atlas", "bamboo", "beacon", "berry", "birch", "breeze",
-  "brook", "cedar", "cherry", "cloud", "clover", "comet", "coral", "crane",
-  "dawn", "delta", "dune", "ember", "falcon", "fern", "field", "fjord",
-  "flame", "forest", "fox", "frost", "garden", "glade", "harbor", "hazel",
-  "heron", "honey", "island", "jade", "lake", "lark", "leaf", "lemon",
-  "lotus", "maple", "meadow", "melon", "mist", "moon", "moss", "ocean",
-  "olive", "orchid", "otter", "pearl", "pine", "plum", "pond", "quartz",
-  "rain", "raven", "reef", "river", "rose", "sage", "shell", "shore",
-  "sky", "snow", "solar", "sparrow", "spruce", "star", "stone", "storm",
-  "sun", "swift", "tide", "tiger", "trail", "tulip", "valley", "violet",
-  "wave", "willow", "wind", "wolf", "wood", "wren", "zephyr", "zinnia",
-] as const;
 
 function randomIndex(max: number, randomBytes: RandomBytes) {
   if (max < 1 || max > 256) throw new Error("Random pool size is invalid.");
@@ -41,6 +45,22 @@ function randomIndex(max: number, randomBytes: RandomBytes) {
     if (!bytes.length) throw new Error("Random source returned too few bytes.");
     if (bytes[0] < limit) return bytes[0] % max;
   }
+}
+
+function randomEffWord(randomBytes: RandomBytes) {
+  const dieSides = 6;
+  let index = 0;
+  let remainingWords = EFF_LONG_WORDS.length;
+
+  while (remainingWords > 1) {
+    if (remainingWords % dieSides !== 0) {
+      throw new Error("EFF wordlist size is invalid.");
+    }
+    index = index * dieSides + randomIndex(dieSides, randomBytes);
+    remainingWords /= dieSides;
+  }
+
+  return EFF_LONG_WORDS[index];
 }
 
 function choose(pool: string, randomBytes: RandomBytes) {
@@ -72,12 +92,23 @@ export function generatePassword(
   randomBytes: RandomBytes = secureRandomBytes,
 ) {
   if (!Number.isInteger(options.length) || options.length < 4 || options.length > 256) {
-    throw new Error("Password length must be an integer from 4 through 256.");
+    throw new PasswordGenerationError(
+      "invalidPasswordLength",
+      "Password length must be an integer from 4 through 256.",
+    );
   }
   const pools = poolsFor(options);
-  if (!pools.length) throw new Error("Select at least one character class.");
+  if (!pools.length) {
+    throw new PasswordGenerationError(
+      "noCharacterClass",
+      "Select at least one character class.",
+    );
+  }
   if (options.length < pools.length) {
-    throw new Error("Password length is too short for every selected class.");
+    throw new PasswordGenerationError(
+      "passwordTooShort",
+      "Password length is too short for every selected class.",
+    );
   }
   const all = pools.join("");
   const characters = pools.map((pool) => choose(pool, randomBytes));
@@ -92,13 +123,19 @@ export function generatePassphrase(
   randomBytes: RandomBytes = secureRandomBytes,
 ) {
   if (!Number.isInteger(options.words) || options.words < 3 || options.words > 20) {
-    throw new Error("Passphrase word count must be an integer from 3 through 20.");
+    throw new PasswordGenerationError(
+      "invalidWordCount",
+      "Passphrase word count must be an integer from 3 through 20.",
+    );
   }
   if (options.separator.length > 3 || /[\r\n]/.test(options.separator)) {
-    throw new Error("Separator must contain at most three non-line-break characters.");
+    throw new PasswordGenerationError(
+      "invalidSeparator",
+      "Separator must contain at most three non-line-break characters.",
+    );
   }
   const words = Array.from({ length: options.words }, () => {
-    const word = WORDS[randomIndex(WORDS.length, randomBytes)];
+    const word = randomEffWord(randomBytes);
     return options.capitalize
       ? word.charAt(0).toUpperCase() + word.slice(1)
       : word;
@@ -120,8 +157,7 @@ export function passwordPoolSize(options: PasswordOptions) {
 
 export function passphraseEntropy(options: PassphraseOptions) {
   return (
-    options.words * Math.log2(WORDS.length) +
+    options.words * Math.log2(EFF_LONG_WORDS.length) +
     (options.includeNumber ? Math.log2(100) : 0)
   );
 }
-
