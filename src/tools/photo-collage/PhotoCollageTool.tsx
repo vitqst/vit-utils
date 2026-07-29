@@ -13,6 +13,12 @@ import {
   type CollageFormat,
   type CollageTemplate,
 } from "./collage";
+import { PhotoCollageBottomSheet } from "./PhotoCollageBottomSheet";
+import { PhotoCollagePhotoList } from "./PhotoCollagePhotoList";
+import { PhotoCollagePreview } from "./PhotoCollagePreview";
+import { PhotoCollageSettings } from "./PhotoCollageSettings";
+import type { ImageTransform } from "./photo-collage-framing";
+import { moveItemById } from "./photo-collage-order";
 
 const copy = {
   en: {
@@ -55,6 +61,7 @@ const copy = {
     width: "Output width",
     format: "Format",
     export: "Export collage",
+    openSettings: "Open collage settings",
     cancel: "Cancel rendering",
     reset: "Reset",
     empty:
@@ -65,6 +72,7 @@ const copy = {
       `Collage ready · ${width}×${height}`,
     processing: "Rendering collage…",
     cancelled: "Rendering cancelled.",
+    statusLabel: "Collage status",
     downloadPng: "Download collage.png",
     downloadJpeg: "Download collage.jpg",
     invalidType: "Choose only PNG, JPEG, or WebP images.",
@@ -114,6 +122,7 @@ const copy = {
     width: "Chiều rộng đầu ra",
     format: "Định dạng",
     export: "Xuất ảnh ghép",
+    openSettings: "Mở cài đặt ảnh ghép",
     cancel: "Hủy kết xuất",
     reset: "Đặt lại",
     empty:
@@ -124,6 +133,7 @@ const copy = {
       `Ảnh ghép sẵn sàng · ${width}×${height}`,
     processing: "Đang kết xuất ảnh ghép…",
     cancelled: "Đã hủy kết xuất.",
+    statusLabel: "Trạng thái ảnh ghép",
     downloadPng: "Tải collage.png",
     downloadJpeg: "Tải collage.jpg",
     invalidType: "Chỉ chọn ảnh PNG, JPEG hoặc WebP.",
@@ -134,12 +144,6 @@ const copy = {
     failed: "Không thể kết xuất ảnh ghép.",
   },
 } as const;
-
-type ImageTransform = {
-  zoom: number;
-  focalX: number;
-  focalY: number;
-};
 
 type ImageItem = {
   id: number;
@@ -165,14 +169,6 @@ type CollageStatus =
   | { type: "ready"; width: number; height: number }
   | { type: "cancelled" }
   | null;
-
-const aspectValues: CollageAspect[] = [
-  "original",
-  "1:1",
-  "4:5",
-  "16:9",
-  "9:16",
-];
 
 const aspectNumbers: Record<Exclude<CollageAspect, "original">, number> = {
   "1:1": 1,
@@ -205,12 +201,17 @@ export default function PhotoCollageTool({ locale }: ToolComponentProps) {
   const [error, setError] = useState("");
   const [resultUrl, setResultUrl] = useState("");
   const [inputKey, setInputKey] = useState(0);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [wideEditor, setWideEditor] = useState(() =>
+    typeof window === "undefined" || !window.matchMedia
+      ? true
+      : window.matchMedia("(min-width: 1280px)").matches,
+  );
   const workerRef = useRef<Worker | null>(null);
   const resultUrlRef = useRef("");
   const imagesRef = useRef<ImageItem[]>([]);
   const operationRef = useRef(0);
   const nextImageId = useRef(0);
-  const draggedId = useRef<number | null>(null);
 
   const templates = useMemo(
     () => (images.length >= 2 ? getCollageTemplates(images.length) : [singleTemplate]),
@@ -271,6 +272,17 @@ export default function PhotoCollageTool({ locale }: ToolComponentProps) {
     [],
   );
 
+  useEffect(() => {
+    if (!window.matchMedia) return;
+    const query = window.matchMedia("(min-width: 1280px)");
+    const update = () => {
+      setWideEditor(query.matches);
+      if (query.matches) setSettingsOpen(false);
+    };
+    query.addEventListener?.("change", update);
+    return () => query.removeEventListener?.("change", update);
+  }, []);
+
   const selectImages = (files: FileList | null) => {
     setError("");
     setStatus(null);
@@ -312,28 +324,13 @@ export default function PhotoCollageTool({ locale }: ToolComponentProps) {
   const move = (index: number, offset: -1 | 1) => {
     const target = index + offset;
     if (target < 0 || target >= images.length) return;
-    invalidateExport();
-    setImages((current) => {
-      const next = [...current];
-      [next[index], next[target]] = [next[target], next[index]];
-      return next;
-    });
+    reorder(images[index].id, images[target].id);
   };
 
-  const swap = (sourceId: number, targetId: number) => {
+  const reorder = (sourceId: number, targetId: number) => {
     if (sourceId === targetId) return;
     invalidateExport();
-    setImages((current) => {
-      const sourceIndex = current.findIndex((item) => item.id === sourceId);
-      const targetIndex = current.findIndex((item) => item.id === targetId);
-      if (sourceIndex < 0 || targetIndex < 0) return current;
-      const next = [...current];
-      [next[sourceIndex], next[targetIndex]] = [
-        next[targetIndex],
-        next[sourceIndex],
-      ];
-      return next;
-    });
+    setImages((current) => moveItemById(current, sourceId, targetId));
   };
 
   const remove = (id: number) => {
@@ -346,17 +343,11 @@ export default function PhotoCollageTool({ locale }: ToolComponentProps) {
     setTemplateId("balanced");
   };
 
-  const updateSelectedTransform = (
-    key: keyof ImageTransform,
-    value: number,
-  ) => {
-    if (!selectedImage) return;
+  const updateImageTransform = (id: number, transform: ImageTransform) => {
     invalidateExport();
     setImages((current) =>
       current.map((image) =>
-        image.id === selectedImage.id
-          ? { ...image, transform: { ...image.transform, [key]: value } }
-          : image,
+        image.id === id ? { ...image, transform } : image,
       ),
     );
   };
@@ -505,10 +496,70 @@ export default function PhotoCollageTool({ locale }: ToolComponentProps) {
 
   const panelClass =
     "min-w-0 rounded-xl border border-[var(--vt-border)] bg-[var(--vt-bg-1)] p-4";
-  const labelClass =
-    "block text-xs font-semibold text-[var(--vt-text-2)]";
-  const controlClass =
-    "mt-1.5 w-full rounded-lg border border-[var(--vt-border)] bg-[var(--vt-bg-0)] px-3 py-2 text-sm text-[var(--vt-text)]";
+  const settingsContent = (
+    <PhotoCollageSettings
+      locale={locale}
+      templates={templates}
+      template={template}
+      onTemplateChange={(id) => {
+        setTemplateId(id);
+        invalidateExport();
+      }}
+      aspect={aspect}
+      onAspectChange={(value) => {
+        setAspect(value);
+        invalidateExport();
+      }}
+      gap={gap}
+      onGapChange={(value) => {
+        setGap(value);
+        invalidateExport();
+      }}
+      cornerRadius={cornerRadius}
+      onCornerRadiusChange={(value) => {
+        setCornerRadius(value);
+        invalidateExport();
+      }}
+      background={background}
+      onBackgroundChange={(value) => {
+        setBackground(value);
+        invalidateExport();
+      }}
+      fit={fit}
+      onFitChange={(value) => {
+        setFit(value);
+        invalidateExport();
+      }}
+      selectedImage={selectedImage}
+      onTransformChange={(transform) => {
+        if (selectedImage) updateImageTransform(selectedImage.id, transform);
+      }}
+      width={width}
+      onWidthChange={(value) => {
+        setWidth(value);
+        invalidateExport();
+      }}
+      format={format}
+      onFormatChange={(value) => {
+        setFormat(value);
+        invalidateExport();
+      }}
+      privacy={t.privacy}
+      error={error}
+      statusText={statusText}
+      running={running}
+      onCancel={cancel}
+      resultUrl={resultUrl}
+      downloadName={downloadName}
+      downloadLabel={downloadLabel}
+      showFeedback={wideEditor}
+      className={
+        wideEditor
+          ? `${panelClass} xl:col-start-3 xl:row-span-2 xl:row-start-1`
+          : ""
+      }
+    />
+  );
 
   return (
     <ToolWorkspace title={t.title} description={t.description}>
@@ -536,8 +587,11 @@ export default function PhotoCollageTool({ locale }: ToolComponentProps) {
         </div>
       </div>
 
-      <div className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-[240px_minmax(0,1fr)_280px]">
-        <section className={panelClass}>
+      <div className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-[280px_minmax(0,1fr)_300px] xl:grid-rows-[auto_1fr] xl:items-start">
+        <section
+          data-photo-add
+          className={`${panelClass} xl:col-start-1 xl:row-start-1`}
+        >
           <label
             onDragOver={(event) => event.preventDefault()}
             onDrop={(event) => {
@@ -563,482 +617,69 @@ export default function PhotoCollageTool({ locale }: ToolComponentProps) {
             />
           </label>
 
-          {images.length ? (
-            <ol
-              aria-label={t.photos}
-              className="mt-4 max-h-[360px] space-y-2 overflow-y-auto pr-1"
-            >
-              {images.map((item, index) => (
-                <li
-                  key={item.id}
-                  data-photo-id={item.id}
-                  draggable
-                  onDragStart={() => {
-                    draggedId.current = item.id;
-                  }}
-                  onDragOver={(event) => event.preventDefault()}
-                  onDrop={() => {
-                    if (draggedId.current !== null) {
-                      swap(draggedId.current, item.id);
-                    }
-                    draggedId.current = null;
-                  }}
-                  onPointerUp={() => {
-                    if (draggedId.current !== null) {
-                      swap(draggedId.current, item.id);
-                    }
-                    draggedId.current = null;
-                  }}
-                  onPointerCancel={() => {
-                    draggedId.current = null;
-                  }}
-                  className={`flex min-w-0 items-center gap-1.5 rounded-lg border p-1.5 ${
-                    selectedImage?.id === item.id
-                      ? "border-emerald-700 bg-emerald-700/5"
-                      : "border-[var(--vt-border)] bg-[var(--vt-bg-0)]"
-                  }`}
-                >
-                  <span
-                    aria-hidden="true"
-                    data-drag-handle
-                    onPointerDown={() => {
-                      draggedId.current = item.id;
-                    }}
-                    className="touch-none cursor-grab text-[var(--vt-text-3)]"
-                  >
-                    ⠿
-                  </span>
-                  <button
-                    type="button"
-                    aria-label={t.select(item.file.name)}
-                    onClick={() => setSelectedId(item.id)}
-                    className="flex min-w-0 flex-1 items-center gap-2 text-left"
-                  >
-                    <img
-                      src={item.previewUrl}
-                      alt={t.previewAlt(item.file.name)}
-                      className="h-11 w-14 rounded-md object-cover"
-                    />
-                    <span className="min-w-0 flex-1 truncate text-[11px] font-semibold">
-                      {item.file.name}
-                    </span>
-                  </button>
-                  <div className="grid gap-0.5">
-                    <button
-                      type="button"
-                      aria-label={t.moveEarlier(item.file.name)}
-                      disabled={index === 0}
-                      onClick={() => move(index, -1)}
-                      className="h-5 w-5 rounded text-[10px] disabled:opacity-30"
-                    >
-                      ↑
-                    </button>
-                    <button
-                      type="button"
-                      aria-label={t.moveLater(item.file.name)}
-                      disabled={index === images.length - 1}
-                      onClick={() => move(index, 1)}
-                      className="h-5 w-5 rounded text-[10px] disabled:opacity-30"
-                    >
-                      ↓
-                    </button>
-                  </div>
-                  <button
-                    type="button"
-                    aria-label={t.remove(item.file.name)}
-                    onClick={() => remove(item.id)}
-                    className="h-7 w-7 rounded text-sm"
-                  >
-                    ×
-                  </button>
-                </li>
-              ))}
-            </ol>
-          ) : null}
-
-          {images.length >= 2 ? (
-            <fieldset className="mt-5">
-              <legend className="mb-2 text-xs font-bold">{t.layouts}</legend>
-              <div className="grid grid-cols-2 gap-2">
-                {templates.map((candidate) => {
-                  const name =
-                    t.templateNames[
-                      candidate.id as keyof typeof t.templateNames
-                    ] ?? candidate.id;
-                  return (
-                    <label
-                      key={candidate.id}
-                      className={`relative aspect-[4/3] cursor-pointer overflow-hidden rounded-lg border-2 bg-[var(--vt-bg-0)] ${
-                        template.id === candidate.id
-                          ? "border-emerald-700"
-                          : "border-[var(--vt-border)]"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="collage-template"
-                        aria-label={name}
-                        value={candidate.id}
-                        checked={template.id === candidate.id}
-                        onChange={() => {
-                          setTemplateId(candidate.id);
-                          invalidateExport();
-                        }}
-                        className="sr-only"
-                      />
-                      {candidate.cells.map((cell, index) => (
-                        <span
-                          key={index}
-                          aria-hidden="true"
-                          className="absolute border border-[var(--vt-bg-0)] bg-[var(--vt-border-2)]"
-                          style={{
-                            left: `${cell.x * 100}%`,
-                            top: `${cell.y * 100}%`,
-                            width: `${cell.width * 100}%`,
-                            height: `${cell.height * 100}%`,
-                          }}
-                        />
-                      ))}
-                      <span className="absolute inset-x-0 bottom-0 truncate bg-[var(--vt-bg-0)]/90 px-1 py-0.5 text-center text-[9px] font-semibold">
-                        {name}
-                      </span>
-                    </label>
-                  );
-                })}
-              </div>
-            </fieldset>
-          ) : null}
         </section>
 
-        <section
-          aria-label={t.livePreview}
-          className={`${panelClass} flex min-h-[460px] items-center justify-center overflow-hidden bg-[var(--vt-bg-2)]`}
-        >
-          {images.length ? (
-            <div
-              className="relative w-full overflow-hidden shadow-xl ring-1 ring-black/10"
-              style={{
-                aspectRatio: String(previewAspect),
-                maxWidth: `min(100%, ${previewAspect * 68}vh)`,
-                background,
+        <PhotoCollagePreview
+          locale={locale}
+          images={images}
+          selectedId={selectedImage?.id ?? null}
+          geometry={previewGeometry}
+          previewAspect={previewAspect}
+          fit={fit}
+          background={background}
+          cornerRadius={cornerRadius}
+          onSelect={setSelectedId}
+          onTransform={updateImageTransform}
+          className="xl:col-start-2 xl:row-span-2 xl:row-start-1"
+        />
+
+        {wideEditor ? (
+          settingsContent
+        ) : (
+          <>
+            <button
+              type="button"
+              aria-label={t.openSettings}
+              onClick={() => {
+                document
+                  .querySelector("[data-collage-preview]")
+                  ?.scrollIntoView?.({ block: "start" });
+                setSettingsOpen(true);
               }}
+              className="min-h-11 rounded-xl border border-[var(--vt-border)] bg-[var(--vt-bg-1)] px-4 py-3 text-sm font-bold"
             >
-              {previewGeometry?.cells.map((cell, index) => {
-                const image = images[index];
-                if (!image) return null;
-                const radius = Math.min(
-                  cornerRadius,
-                  cell.width / 2,
-                  cell.height / 2,
-                );
-                return (
-                  <button
-                    key={image.id}
-                    type="button"
-                    aria-label={t.select(image.file.name)}
-                    onClick={() => setSelectedId(image.id)}
-                    className={`absolute overflow-hidden ${
-                      selectedImage?.id === image.id
-                        ? "ring-2 ring-inset ring-emerald-700"
-                        : ""
-                    }`}
-                    style={{
-                      left: `${(cell.x / previewGeometry.width) * 100}%`,
-                      top: `${(cell.y / previewGeometry.height) * 100}%`,
-                      width: `${(cell.width / previewGeometry.width) * 100}%`,
-                      height: `${(cell.height / previewGeometry.height) * 100}%`,
-                      borderRadius: `${(radius / cell.width) * 100}% / ${(radius / cell.height) * 100}%`,
-                      background,
-                    }}
-                  >
-                    <img
-                      src={image.previewUrl}
-                      alt={t.previewAlt(image.file.name)}
-                      className="h-full w-full"
-                      style={{
-                        objectFit: fit === "fill" ? "cover" : "contain",
-                        objectPosition: `${image.transform.focalX * 100}% ${image.transform.focalY * 100}%`,
-                        transformOrigin: `${image.transform.focalX * 100}% ${image.transform.focalY * 100}%`,
-                        transform:
-                          fit === "fill"
-                            ? `scale(${image.transform.zoom})`
-                            : undefined,
-                      }}
-                    />
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="max-w-sm text-center">
-              <div
-                aria-hidden="true"
-                className="mx-auto mb-4 grid h-24 w-24 grid-cols-2 gap-1 rounded-xl border border-dashed border-[var(--vt-border-2)] p-2"
+              {t.openSettings}
+            </button>
+            <PhotoCollageBottomSheet
+              locale={locale}
+              open={settingsOpen}
+              onClose={() => setSettingsOpen(false)}
+            >
+              {settingsContent}
+            </PhotoCollageBottomSheet>
+            {error ? (
+              <p
+                role="alert"
+                className="rounded-lg border border-[var(--vt-red)]/40 p-3 text-xs text-[var(--vt-red)]"
               >
-                <span className="rounded bg-[var(--vt-border)]" />
-                <span className="rounded bg-[var(--vt-border)]" />
-                <span className="col-span-2 rounded bg-[var(--vt-border)]" />
-              </div>
-              <p className="text-sm leading-6 text-[var(--vt-text-3)]">
-                {t.empty}
+                {error}
               </p>
-            </div>
-          )}
-        </section>
-
-        <section className={panelClass}>
-          <h2 className="text-sm font-bold">{t.settings}</h2>
-
-          <fieldset className="mt-4">
-            <legend className="mb-2 text-xs font-semibold text-[var(--vt-text-2)]">
-              {t.aspect}
-            </legend>
-            <div className="grid grid-cols-5 gap-1">
-              {aspectValues.map((value) => {
-                const name = value === "original" ? t.original : value;
-                return (
-                  <label
-                    key={value}
-                    className={`cursor-pointer rounded-md border px-1 py-2 text-center text-[11px] font-semibold ${
-                      aspect === value
-                        ? "border-emerald-700 bg-emerald-700/10 text-emerald-700 dark:text-emerald-300"
-                        : "border-[var(--vt-border)]"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="collage-aspect"
-                      aria-label={name}
-                      checked={aspect === value}
-                      onChange={() => {
-                        setAspect(value);
-                        invalidateExport();
-                      }}
-                      className="sr-only"
-                    />
-                    {name}
-                  </label>
-                );
-              })}
-            </div>
-          </fieldset>
-
-          <div className="mt-5 space-y-4">
-            <label className={labelClass}>
-              <span className="flex justify-between">
-                <span>{t.spacing}</span>
-                <span>{gap}px</span>
-              </span>
-              <input
-                aria-label={t.spacing}
-                type="range"
-                min={0}
-                max={128}
-                value={gap}
-                onChange={(event) => {
-                  setGap(Number(event.target.value));
-                  invalidateExport();
-                }}
-                className="mt-2 w-full accent-emerald-700"
-              />
-            </label>
-            <label className={labelClass}>
-              <span className="flex justify-between">
-                <span>{t.corner}</span>
-                <span>{cornerRadius}px</span>
-              </span>
-              <input
-                aria-label={t.corner}
-                type="range"
-                min={0}
-                max={128}
-                value={cornerRadius}
-                onChange={(event) => {
-                  setCornerRadius(Number(event.target.value));
-                  invalidateExport();
-                }}
-                className="mt-2 w-full accent-emerald-700"
-              />
-            </label>
-            <label className={labelClass}>
-              {t.background}
-              <input
-                aria-label={t.background}
-                type="color"
-                value={background}
-                onChange={(event) => {
-                  setBackground(event.target.value);
-                  invalidateExport();
-                }}
-                className={`${controlClass} h-10 p-1`}
-              />
-            </label>
-          </div>
-
-          <fieldset className="mt-5">
-            <legend className="mb-2 text-xs font-semibold text-[var(--vt-text-2)]">
-              {t.fit}
-            </legend>
-            <div className="grid grid-cols-2 gap-2">
-              {(["fill", "fit"] as CollageFit[]).map((value) => (
-                <label
-                  key={value}
-                  className={`cursor-pointer rounded-lg border px-3 py-2 text-center text-xs font-bold ${
-                    fit === value
-                      ? "border-emerald-700 bg-emerald-700 text-white"
-                      : "border-[var(--vt-border)]"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="image-fit"
-                    aria-label={value === "fill" ? t.fill : t.contain}
-                    checked={fit === value}
-                    onChange={() => {
-                      setFit(value);
-                      invalidateExport();
-                    }}
-                    className="sr-only"
-                  />
-                  {value === "fill" ? t.fill : t.contain}
-                </label>
-              ))}
-            </div>
-          </fieldset>
-
-          <div className="mt-5 border-t border-[var(--vt-border)] pt-4">
-            <h3 className="text-xs font-bold">{t.selectedPhoto}</h3>
-            {selectedImage ? (
-              <div className="mt-3 space-y-4">
-                <p className="truncate text-xs text-[var(--vt-text-3)]">
-                  {selectedImage.file.name}
-                </p>
-                <label className={labelClass}>
-                  <span className="flex justify-between">
-                    <span>{t.zoomLabel}</span>
-                    <span>{Math.round(selectedImage.transform.zoom * 100)}%</span>
-                  </span>
-                  <input
-                    aria-label={t.zoom(selectedImage.file.name)}
-                    type="range"
-                    min={100}
-                    max={300}
-                    value={Math.round(selectedImage.transform.zoom * 100)}
-                    onChange={(event) =>
-                      updateSelectedTransform(
-                        "zoom",
-                        Number(event.target.value) / 100,
-                      )
-                    }
-                    className="mt-2 w-full accent-emerald-700"
-                  />
-                </label>
-                <label className={labelClass}>
-                  <span className="flex justify-between">
-                    <span>{locale === "en" ? "Horizontal" : "Ngang"}</span>
-                    <span>{Math.round(selectedImage.transform.focalX * 100)}%</span>
-                  </span>
-                  <input
-                    aria-label={t.horizontal(selectedImage.file.name)}
-                    type="range"
-                    min={0}
-                    max={100}
-                    value={Math.round(selectedImage.transform.focalX * 100)}
-                    onChange={(event) =>
-                      updateSelectedTransform(
-                        "focalX",
-                        Number(event.target.value) / 100,
-                      )
-                    }
-                    className="mt-2 w-full accent-emerald-700"
-                  />
-                </label>
-                <label className={labelClass}>
-                  <span className="flex justify-between">
-                    <span>{locale === "en" ? "Vertical" : "Dọc"}</span>
-                    <span>{Math.round(selectedImage.transform.focalY * 100)}%</span>
-                  </span>
-                  <input
-                    aria-label={t.vertical(selectedImage.file.name)}
-                    type="range"
-                    min={0}
-                    max={100}
-                    value={Math.round(selectedImage.transform.focalY * 100)}
-                    onChange={(event) =>
-                      updateSelectedTransform(
-                        "focalY",
-                        Number(event.target.value) / 100,
-                      )
-                    }
-                    className="mt-2 w-full accent-emerald-700"
-                  />
-                </label>
-              </div>
-            ) : (
-              <p className="mt-2 text-xs leading-5 text-[var(--vt-text-3)]">
-                {t.noPhoto}
+            ) : null}
+            {statusText ? (
+              <p
+                role="status"
+                aria-label={t.statusLabel}
+                aria-live="polite"
+                className="text-xs"
+              >
+                {statusText}
               </p>
-            )}
-          </div>
-
-          <div className="mt-5 border-t border-[var(--vt-border)] pt-4">
-            <h3 className="text-xs font-bold">{t.output}</h3>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <label className={labelClass}>
-                {t.width}
-                <input
-                  aria-label={t.width}
-                  type="number"
-                  min={320}
-                  max={4096}
-                  value={width}
-                  onChange={(event) => {
-                    setWidth(Number(event.target.value));
-                    invalidateExport();
-                  }}
-                  className={controlClass}
-                />
-              </label>
-              <label className={labelClass}>
-                {t.format}
-                <select
-                  aria-label={t.format}
-                  value={format}
-                  onChange={(event) => {
-                    setFormat(event.target.value as CollageFormat);
-                    invalidateExport();
-                  }}
-                  className={controlClass}
-                >
-                  <option value="image/png">PNG</option>
-                  <option value="image/jpeg">JPEG</option>
-                </select>
-              </label>
-            </div>
-          </div>
-
-          <p className="mt-5 text-[11px] leading-5 text-[var(--vt-text-3)]">
-            {t.privacy}
-          </p>
-          {error ? (
-            <p
-              role="alert"
-              className="mt-3 rounded-lg border border-[var(--vt-red)]/40 p-3 text-xs text-[var(--vt-red)]"
-            >
-              {error}
-            </p>
-          ) : null}
-          {statusText ? (
-            <p role="status" aria-live="polite" className="mt-3 text-xs">
-              {statusText}
-            </p>
-          ) : null}
-          <div className="mt-3 grid gap-2">
+            ) : null}
             {running ? (
               <button
                 type="button"
                 onClick={cancel}
-                className="rounded-lg border border-[var(--vt-border-2)] px-3 py-2 text-xs font-bold"
+                className="min-h-11 rounded-lg border border-[var(--vt-border-2)] px-3 py-2 text-xs font-bold"
               >
                 {t.cancel}
               </button>
@@ -1047,13 +688,30 @@ export default function PhotoCollageTool({ locale }: ToolComponentProps) {
               <a
                 href={resultUrl}
                 download={downloadName}
-                className="rounded-lg bg-emerald-700 px-3 py-2 text-center text-xs font-bold text-white"
+                className="rounded-lg bg-emerald-700 px-3 py-3 text-center text-xs font-bold text-white"
               >
                 {downloadLabel}
               </a>
             ) : null}
-          </div>
-        </section>
+          </>
+        )}
+
+        {images.length ? (
+          <section
+            data-photo-order
+            className={`${panelClass} xl:col-start-1 xl:row-start-2`}
+          >
+            <PhotoCollagePhotoList
+              locale={locale}
+              items={images}
+              selectedId={selectedImage?.id ?? null}
+              onSelect={setSelectedId}
+              onMove={move}
+              onRemove={remove}
+              onReorder={reorder}
+            />
+          </section>
+        ) : null}
       </div>
     </ToolWorkspace>
   );

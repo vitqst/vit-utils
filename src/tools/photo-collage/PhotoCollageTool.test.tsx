@@ -8,6 +8,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import PhotoCollageTool from "./PhotoCollageTool";
+import { photoListCollisionDetection } from "./PhotoCollagePhotoList";
 
 class FakeWorker {
   static instances: FakeWorker[] = [];
@@ -66,15 +67,31 @@ describe("Photo collage editor", () => {
     fireEvent.change(screen.getByLabelText("Zoom for second.jpg"), {
       target: { value: "180" },
     });
+    const zoomValue = screen.getByLabelText("Zoom value for second.jpg");
+    fireEvent.change(zoomValue, { target: { value: "" } });
+    expect(zoomValue).toHaveValue(null);
+    expect(screen.getByLabelText("Zoom for second.jpg")).toHaveValue("180");
+    fireEvent.change(zoomValue, { target: { value: "175" } });
+    expect(screen.getByLabelText("Zoom for second.jpg")).toHaveValue("180");
+    fireEvent.blur(zoomValue);
+    expect(screen.getByLabelText("Zoom for second.jpg")).toHaveValue("175");
     fireEvent.change(screen.getByLabelText("Horizontal position for second.jpg"), {
       target: { value: "80" },
     });
+    fireEvent.change(
+      screen.getByLabelText("Horizontal value for second.jpg"),
+      { target: { value: "65" } },
+    );
+    fireEvent.blur(screen.getByLabelText("Horizontal value for second.jpg"));
+    expect(
+      screen.getByLabelText("Horizontal position for second.jpg"),
+    ).toHaveValue("65");
     const livePhoto = screen
       .getAllByAltText("second.jpg preview")
       .find((image) => image.classList.contains("h-full"));
     expect(livePhoto).toHaveStyle({
-      objectPosition: "80% 50%",
-      transformOrigin: "80% 50%",
+      objectPosition: "65% 50%",
+      transformOrigin: "65% 50%",
     });
     fireEvent.change(screen.getByLabelText("Corner radius"), {
       target: { value: "24" },
@@ -98,7 +115,7 @@ describe("Photo collage editor", () => {
           cornerRadius: 24,
           imageTransforms: [
             { zoom: 1, focalX: 0.5, focalY: 0.5 },
-            { zoom: 1.8, focalX: 0.8, focalY: 0.5 },
+            { zoom: 1.75, focalX: 0.65, focalY: 0.5 },
           ],
           width: 1200,
           format: "image/png",
@@ -125,7 +142,9 @@ describe("Photo collage editor", () => {
     expect(
       await screen.findByRole("link", { name: "Download collage.png" }),
     ).toHaveAttribute("download", "collage.png");
-    expect(screen.getByRole("status")).toHaveTextContent(
+    expect(
+      screen.getByRole("status", { name: "Collage status" }),
+    ).toHaveTextContent(
       "Collage ready · 1200×1500",
     );
 
@@ -149,6 +168,9 @@ describe("Photo collage editor", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "Move second.jpg earlier" }),
     );
+    expect(
+      screen.getByRole("status", { name: "Photo order status" }),
+    ).toHaveTextContent("second.jpg moved to position 1");
 
     const photoList = screen.getByRole("list", { name: "Photos" });
     expect(photoList.textContent?.indexOf("second.jpg")).toBeLessThan(
@@ -158,31 +180,297 @@ describe("Photo collage editor", () => {
     expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:first.png");
   });
 
-  it("swaps photos with touch pointer dragging", () => {
+  it("pans, pinches, cancels, and resets framing on the selected preview", () => {
     render(<PhotoCollageTool locale="en" />);
     fireEvent.change(screen.getByLabelText("Add photos"), {
       target: {
-        files: [
-          new File(["first"], "first.png", { type: "image/png" }),
-          new File(["second"], "second.png", { type: "image/png" }),
-        ],
+        files: [new File(["one"], "one.png", { type: "image/png" })],
+      },
+    });
+    const surface = screen
+      .getAllByRole("button", { name: "Select one.png" })
+      .find((button) => button.hasAttribute("data-framing-surface"))!;
+    expect(surface).toBeDefined();
+    vi.spyOn(surface, "getBoundingClientRect").mockReturnValue({
+      x: 0,
+      y: 0,
+      top: 0,
+      right: 400,
+      bottom: 400,
+      left: 0,
+      width: 400,
+      height: 400,
+      toJSON: () => ({}),
+    } as DOMRect);
+    const image = screen
+      .getAllByAltText("one.png preview")
+      .find((candidate) => candidate.closest("[data-framing-surface]"))!;
+    Object.defineProperties(image, {
+      naturalWidth: { configurable: true, value: 1200 },
+      naturalHeight: { configurable: true, value: 800 },
+    });
+    fireEvent.load(image);
+    expect(image).toHaveStyle({
+      left: "-25%",
+      top: "0%",
+      width: "150%",
+      height: "100%",
+    });
+
+    fireEvent.pointerDown(surface, {
+      pointerId: 1,
+      pointerType: "touch",
+      clientX: 200,
+      clientY: 200,
+    });
+    fireEvent.pointerMove(surface, {
+      pointerId: 1,
+      pointerType: "touch",
+      clientX: 300,
+      clientY: 200,
+    });
+    fireEvent.pointerUp(surface, {
+      pointerId: 1,
+      pointerType: "touch",
+      clientX: 300,
+      clientY: 200,
+    });
+    expect(screen.getByLabelText("Horizontal position for one.png")).toHaveValue(
+      "0",
+    );
+
+    fireEvent.pointerDown(surface, {
+      pointerId: 2,
+      pointerType: "touch",
+      clientX: 100,
+      clientY: 200,
+    });
+    fireEvent.pointerDown(surface, {
+      pointerId: 3,
+      pointerType: "touch",
+      clientX: 300,
+      clientY: 200,
+    });
+    fireEvent.pointerMove(surface, {
+      pointerId: 3,
+      pointerType: "touch",
+      clientX: 380,
+      clientY: 200,
+    });
+    expect(Number(screen.getByLabelText("Zoom for one.png").getAttribute("value"))).toBeGreaterThan(
+      100,
+    );
+    fireEvent.pointerCancel(surface, {
+      pointerId: 3,
+      pointerType: "touch",
+    });
+    expect(screen.getByLabelText("Zoom for one.png")).toHaveValue("100");
+
+    fireEvent.doubleClick(surface);
+    expect(screen.getByLabelText("Horizontal position for one.png")).toHaveValue(
+      "50",
+    );
+  });
+
+  it("keeps the preview visible behind an accessible mobile settings sheet", async () => {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn().mockReturnValue({
+        matches: false,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      }),
+    );
+    render(<PhotoCollageTool locale="en" />);
+    const addInput = screen.getByLabelText("Add photos");
+    expect(addInput).toHaveAttribute("multiple");
+    expect(addInput).not.toHaveAttribute("capture");
+    fireEvent.change(addInput, {
+      target: {
+        files: [new File(["one"], "one.png", { type: "image/png" })],
+      },
+    });
+
+    const preview = screen.getByRole("region", {
+      name: "Live collage preview",
+    });
+    const photoList = screen.getByRole("list", { name: "Photos" });
+    expect(
+      preview.compareDocumentPosition(photoList) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Export collage" }));
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      /at least 2 images/i,
+    );
+    const opener = screen.getByRole("button", {
+      name: "Open collage settings",
+    });
+    fireEvent.click(opener);
+
+    const sheet = await screen.findByRole("dialog", {
+      name: "Collage settings",
+    });
+    const close = screen.getByRole("button", { name: "Close settings" });
+    expect(sheet).not.toContainElement(preview);
+    await waitFor(() => expect(close).toHaveFocus());
+    expect(
+      screen.getByRole("button", { name: "Drag to close settings" }),
+    ).toBeVisible();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Drag to close settings" }),
+    );
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("dialog", { name: "Collage settings" }),
+      ).not.toBeInTheDocument(),
+    );
+    expect(opener).toHaveFocus();
+
+    fireEvent.click(opener);
+    await screen.findByRole("dialog", { name: "Collage settings" });
+    const reopenedHandle = screen.getByRole("button", {
+      name: "Drag to close settings",
+    });
+    fireEvent.pointerDown(reopenedHandle, {
+      pointerId: 31,
+      clientX: 100,
+      clientY: 100,
+    });
+    fireEvent.pointerMove(reopenedHandle, {
+      pointerId: 31,
+      clientX: 100,
+      clientY: 60,
+    });
+    fireEvent.pointerUp(reopenedHandle, {
+      pointerId: 31,
+      clientX: 100,
+      clientY: 60,
+    });
+    fireEvent.click(reopenedHandle);
+    expect(
+      screen.getByRole("dialog", { name: "Collage settings" }),
+    ).toBeInTheDocument();
+
+    fireEvent.pointerDown(reopenedHandle, {
+      pointerId: 32,
+      clientX: 100,
+      clientY: 100,
+    });
+    fireEvent.pointerMove(reopenedHandle, {
+      pointerId: 32,
+      clientX: 140,
+      clientY: 100,
+    });
+    fireEvent.pointerCancel(reopenedHandle, { pointerId: 32 });
+    fireEvent.click(reopenedHandle);
+    expect(
+      screen.getByRole("dialog", { name: "Collage settings" }),
+    ).toBeInTheDocument();
+
+    fireEvent.keyDown(
+      screen.getByRole("dialog", { name: "Collage settings" }),
+      { key: "Escape", code: "Escape" },
+    );
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("dialog", { name: "Collage settings" }),
+      ).not.toBeInTheDocument(),
+    );
+    expect(opener).toHaveFocus();
+  });
+
+  it("inserts a keyboard-dragged photo and exposes the same touch handle", async () => {
+    render(<PhotoCollageTool locale="en" />);
+    fireEvent.change(screen.getByLabelText("Add photos"), {
+      target: {
+        files: Array.from(
+          { length: 5 },
+          (_, index) =>
+            new File([String(index + 1)], `${index + 1}.png`, {
+              type: "image/png",
+            }),
+        ),
       },
     });
     const photoList = screen.getByRole("list", { name: "Photos" });
     const items = photoList.querySelectorAll("li");
-    const handle = items[1].querySelector("span")!;
+    const handle = screen.getByRole("button", { name: "Reorder 5.png" });
 
-    fireEvent.pointerDown(handle, { pointerId: 7, pointerType: "touch" });
-    fireEvent.pointerUp(items[0], {
-      pointerId: 7,
-      pointerType: "touch",
-      clientX: 10,
-      clientY: 10,
+    expect(handle).toHaveAttribute("aria-describedby");
+    expect(photoList.querySelector('[draggable="true"]')).toBeNull();
+
+    items.forEach((item, index) => {
+      vi.spyOn(item, "getBoundingClientRect").mockReturnValue({
+        x: 0,
+        y: index * 60,
+        top: index * 60,
+        right: 240,
+        bottom: index * 60 + 48,
+        left: 0,
+        width: 240,
+        height: 48,
+        toJSON: () => ({}),
+      } as DOMRect);
+    });
+    handle.focus();
+    fireEvent.keyDown(handle, { key: " ", code: "Space" });
+    await waitFor(() =>
+      expect(document.querySelector("[data-drag-overlay]")).toBeInTheDocument(),
+    );
+    for (let index = 0; index < 4; index += 1) {
+      fireEvent.keyDown(handle, { key: "ArrowUp", code: "ArrowUp" });
+      await act(async () => undefined);
+    }
+    fireEvent.keyDown(handle, { key: " ", code: "Space" });
+
+    await waitFor(() =>
+      expect(
+        Array.from(photoList.querySelectorAll("li")).map(
+          (item) => item.querySelector("img")?.getAttribute("alt"),
+        ),
+      ).toEqual([
+        "5.png preview",
+        "1.png preview",
+        "2.png preview",
+        "3.png preview",
+        "4.png preview",
+      ]),
+    );
+  });
+
+  it("has no pointer drop target outside the photo list", () => {
+    const rect = {
+      top: 0,
+      right: 240,
+      bottom: 48,
+      left: 0,
+      width: 240,
+      height: 48,
+      offsetTop: 0,
+      offsetLeft: 0,
+    };
+    const droppable = {
+      id: 1,
+      key: 1,
+      data: { current: undefined },
+      disabled: false,
+      node: { current: null },
+      rect: { current: rect },
+    };
+    const collisions = photoListCollisionDetection({
+      active: {
+        id: 1,
+        data: { current: undefined },
+        rect: { current: { initial: rect, translated: rect } },
+      },
+      collisionRect: rect,
+      droppableRects: new Map([[1, rect]]),
+      droppableContainers: [droppable],
+      pointerCoordinates: { x: 500, y: 1000 },
     });
 
-    expect(photoList.textContent?.indexOf("second.png")).toBeLessThan(
-      photoList.textContent?.indexOf("first.png") ?? 0,
-    );
+    expect(collisions).toEqual([]);
   });
 
   it("validates selection, exposes cancellation, and ships Vietnamese offline copy", async () => {
@@ -202,6 +490,9 @@ describe("Photo collage editor", () => {
         files: [new File(["one"], "one.png", { type: "image/png" })],
       },
     });
+    expect(
+      screen.getByRole("button", { name: "Sắp xếp lại one.png" }),
+    ).toHaveAttribute("aria-roledescription", "có thể sắp xếp");
     expect(screen.getByText("Thu phóng")).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Xuất ảnh ghép" }));
     expect(screen.getByRole("alert")).toHaveTextContent(/ít nhất 2 ảnh/i);
@@ -215,7 +506,9 @@ describe("Photo collage editor", () => {
     await waitFor(() => expect(FakeWorker.instances).toHaveLength(1));
     fireEvent.click(screen.getByRole("button", { name: "Hủy kết xuất" }));
     expect(FakeWorker.instances[0].terminate).toHaveBeenCalled();
-    expect(screen.getByRole("status")).toHaveTextContent(/đã hủy/i);
+    expect(
+      screen.getByRole("status", { name: "Trạng thái ảnh ghép" }),
+    ).toHaveTextContent(/đã hủy/i);
   });
 
   it("does not start a worker when unmounted during file reads", async () => {
