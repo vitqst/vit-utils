@@ -382,3 +382,5 @@ Implementation completed on `agent/mobile-photo-collage`.
 - Independent review found seven concrete interaction/accessibility issues.
   All were fixed with regression tests; the final re-review reported no
   remaining findings.
+- Delivery: implementation commit `a6a858e`; draft PR
+  [#9](https://github.com/vitqst/vit-utils/pull/9).
