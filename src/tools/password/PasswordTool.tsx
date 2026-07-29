@@ -12,12 +12,15 @@ import {
   generatePassphrase,
   generatePassword,
   passphraseEntropy,
+  PasswordGenerationError,
   passwordPoolSize,
+  type PasswordGenerationErrorCode,
   type PassphraseOptions,
   type PasswordOptions,
 } from "./password";
 
 type GeneratorMode = "password" | "passphrase";
+type GenerationError = PasswordGenerationErrorCode | "generationFailed";
 
 const copy = {
   en: {
@@ -34,6 +37,8 @@ const copy = {
     symbols: "Symbols",
     ambiguous: "Exclude ambiguous characters",
     words: "Word count",
+    wordlist:
+      "Uses EFF's long list of 7,776 words. EFF recommends at least six words.",
     separator: "Separator",
     capitalize: "Capitalize words",
     number: "Add numeric suffix",
@@ -48,6 +53,17 @@ const copy = {
     copied: "Copied",
     copyFailed: "Copy failed",
     clear: "Clear secret",
+    errors: {
+      invalidPasswordLength:
+        "Enter a whole-number password length from 4 through 256.",
+      noCharacterClass: "Select at least one character class.",
+      passwordTooShort:
+        "The password is too short to include every selected character class.",
+      invalidWordCount: "Enter a whole-number word count from 3 through 20.",
+      invalidSeparator:
+        "Use no more than three separator characters without line breaks.",
+      generationFailed: "Could not generate a secret.",
+    },
   },
   vi: {
     title: "Tạo mật khẩu",
@@ -63,6 +79,8 @@ const copy = {
     symbols: "Ký hiệu",
     ambiguous: "Loại ký tự dễ nhầm",
     words: "Số từ",
+    wordlist:
+      "Dùng danh sách dài 7.776 từ của EFF. EFF khuyến nghị ít nhất sáu từ.",
     separator: "Ký tự phân cách",
     capitalize: "Viết hoa đầu từ",
     number: "Thêm số ở cuối",
@@ -77,6 +95,17 @@ const copy = {
     copied: "Đã sao chép",
     copyFailed: "Không thể sao chép",
     clear: "Xóa bí mật",
+    errors: {
+      invalidPasswordLength:
+        "Nhập độ dài mật khẩu là số nguyên từ 4 đến 256.",
+      noCharacterClass: "Chọn ít nhất một loại ký tự.",
+      passwordTooShort:
+        "Mật khẩu quá ngắn để chứa mọi loại ký tự đã chọn.",
+      invalidWordCount: "Nhập số từ là số nguyên từ 3 đến 20.",
+      invalidSeparator:
+        "Chỉ dùng tối đa ba ký tự phân cách và không chứa ký tự xuống dòng.",
+      generationFailed: "Không thể tạo bí mật.",
+    },
   },
 } as const;
 
@@ -92,13 +121,13 @@ export default function PasswordTool({ locale }: ToolComponentProps) {
     excludeAmbiguous: false,
   });
   const [phraseOptions, setPhraseOptions] = useState<PassphraseOptions>({
-    words: 4,
+    words: 6,
     separator: "-",
     capitalize: false,
     includeNumber: false,
   });
   const [secret, setSecret] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState<GenerationError | null>(null);
   const entropy = useMemo(
     () =>
       mode === "password"
@@ -110,6 +139,11 @@ export default function PasswordTool({ locale }: ToolComponentProps) {
     [mode, passwordOptions, phraseOptions],
   );
 
+  const clearResult = () => {
+    setSecret("");
+    setError(null);
+  };
+
   const generate = () => {
     try {
       setSecret(
@@ -117,13 +151,13 @@ export default function PasswordTool({ locale }: ToolComponentProps) {
           ? generatePassword(passwordOptions)
           : generatePassphrase(phraseOptions),
       );
-      setError("");
+      setError(null);
     } catch (generationError) {
       setSecret("");
       setError(
-        generationError instanceof Error
-          ? generationError.message
-          : String(generationError),
+        generationError instanceof PasswordGenerationError
+          ? generationError.code
+          : "generationFailed",
       );
     }
   };
@@ -139,12 +173,13 @@ export default function PasswordTool({ locale }: ToolComponentProps) {
       <input
         type="checkbox"
         checked={passwordOptions[key]}
-        onChange={(event) =>
+        onChange={(event) => {
           setPasswordOptions((current) => ({
             ...current,
             [key]: event.target.checked,
-          }))
-        }
+          }));
+          clearResult();
+        }}
       />
       {label}
     </label>
@@ -161,8 +196,7 @@ export default function PasswordTool({ locale }: ToolComponentProps) {
               value={mode}
               onChange={(event) => {
                 setMode(event.target.value as GeneratorMode);
-                setSecret("");
-                setError("");
+                clearResult();
               }}
               className="mt-1.5 w-full rounded-lg border border-[var(--vt-border)] bg-[var(--vt-bg-0)] px-3 py-2 text-sm text-[var(--vt-text)]"
             >
@@ -180,12 +214,13 @@ export default function PasswordTool({ locale }: ToolComponentProps) {
                   min={4}
                   max={256}
                   value={passwordOptions.length}
-                  onChange={(event) =>
+                  onChange={(event) => {
                     setPasswordOptions((current) => ({
                       ...current,
                       length: Number(event.target.value),
-                    }))
-                  }
+                    }));
+                    clearResult();
+                  }}
                   className="mt-1.5 w-full rounded-lg border border-[var(--vt-border)] bg-[var(--vt-bg-0)] px-3 py-2 font-mono text-sm text-[var(--vt-text)]"
                 />
               </label>
@@ -207,27 +242,32 @@ export default function PasswordTool({ locale }: ToolComponentProps) {
                   min={3}
                   max={20}
                   value={phraseOptions.words}
-                  onChange={(event) =>
+                  onChange={(event) => {
                     setPhraseOptions((current) => ({
                       ...current,
                       words: Number(event.target.value),
-                    }))
-                  }
+                    }));
+                    clearResult();
+                  }}
                   className="mt-1.5 w-full rounded-lg border border-[var(--vt-border)] bg-[var(--vt-bg-0)] px-3 py-2 font-mono text-sm text-[var(--vt-text)]"
                 />
               </label>
+              <p className="mt-2 text-xs leading-5 text-[var(--vt-text-3)]">
+                {t.wordlist}
+              </p>
               <label className="mt-4 block text-xs font-semibold text-[var(--vt-text-2)]">
                 {t.separator}
                 <input
                   aria-label={t.separator}
                   value={phraseOptions.separator}
                   maxLength={3}
-                  onChange={(event) =>
+                  onChange={(event) => {
                     setPhraseOptions((current) => ({
                       ...current,
                       separator: event.target.value,
-                    }))
-                  }
+                    }));
+                    clearResult();
+                  }}
                   className="mt-1.5 w-full rounded-lg border border-[var(--vt-border)] bg-[var(--vt-bg-0)] px-3 py-2 font-mono text-sm text-[var(--vt-text)]"
                 />
               </label>
@@ -245,12 +285,13 @@ export default function PasswordTool({ locale }: ToolComponentProps) {
                     <input
                       type="checkbox"
                       checked={phraseOptions[key]}
-                      onChange={(event) =>
+                      onChange={(event) => {
                         setPhraseOptions((current) => ({
                           ...current,
                           [key]: event.target.checked,
-                        }))
-                      }
+                        }));
+                        clearResult();
+                      }}
                     />
                     {label}
                   </label>
@@ -275,7 +316,7 @@ export default function PasswordTool({ locale }: ToolComponentProps) {
               role="alert"
               className="rounded-lg border border-[var(--vt-red)]/40 bg-[var(--vt-red)]/10 p-3 font-mono text-xs text-[var(--vt-red)]"
             >
-              {error}
+              {t.errors[error]}
             </p>
           ) : (
             <ToolOutput label={t.result} value={secret} emptyLabel={t.empty} />
@@ -288,6 +329,7 @@ export default function PasswordTool({ locale }: ToolComponentProps) {
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <CopyButton
+              key={secret}
               value={secret}
               label={t.copy}
               copiedLabel={t.copied}
@@ -297,7 +339,7 @@ export default function PasswordTool({ locale }: ToolComponentProps) {
               type="button"
               aria-label={t.clear}
               disabled={!secret}
-              onClick={() => setSecret("")}
+              onClick={clearResult}
               className="rounded-lg border border-[var(--vt-border-2)] px-3 py-2 text-xs font-semibold text-[var(--vt-text)] disabled:opacity-50"
             >
               {t.clear}
@@ -308,4 +350,3 @@ export default function PasswordTool({ locale }: ToolComponentProps) {
     </ToolWorkspace>
   );
 }
-
