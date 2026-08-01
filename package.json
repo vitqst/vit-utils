@@ -42,7 +42,7 @@
     "qrcode": "^1.5.4",
     "react": "^19.2.7",
     "react-dom": "^19.2.8",
-    "read-excel-file": "^9.3.4",
+    "read-excel-file": "^9.3.5",
     "reflect-metadata": "^0.2.2",
     "sql-formatter": "^15.8.2",
     "write-excel-file": "^4.1.1",
